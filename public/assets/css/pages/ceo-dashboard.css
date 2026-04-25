@@ -1,0 +1,34 @@
+.ceo-stat-card {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.ceo-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
+}
+
+.ceo-stat-card--success {
+  background: linear-gradient(135deg, #f8fff9 0%, #eefaf1 100%);
+}
+
+.ceo-chart-container {
+  position: relative;
+  min-height: 380px;
+}
+
+.ceo-chart-container canvas {
+  width: 100% !important;
+  height: 340px !important;
+}
+
+@media (max-width: 575.98px) {
+  .ceo-chart-container {
+    min-height: 320px;
+  }
+
+  .ceo-chart-container canvas {
+    height: 280px !important;
+  }
+}

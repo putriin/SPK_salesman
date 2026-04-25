@@ -1,0 +1,54 @@
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.custom-header {
+  background: #4a81b3;
+  border-bottom: none;
+}
+
+.btn-edit-custom {
+  background: #fefd99;
+  color: #000;
+  border: 1px solid #e5df7a;
+  border-radius: 12px;
+  min-width: 70px;
+  font-weight: 600;
+}
+
+.btn-edit-custom:hover {
+  background: #f7f57d;
+  color: #000;
+}
+
+.btn-detail-custom {
+  background: #d9f1ff;
+  color: #000;
+  border: 1px solid #b7dff4;
+  border-radius: 12px;
+  min-width: 70px;
+  font-weight: 600;
+}
+
+.btn-detail-custom:hover {
+  background: #c7e9fb;
+  color: #000;
+}
+
+.btn-cancel-custom {
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  color: #333;
+}
+
+.btn-cancel-custom:hover {
+  background: #ff3737;
+  color: #fff;
+  border-color: #e12b2b;
+}
+
+.score-input {
+  min-width: 110px;
+}

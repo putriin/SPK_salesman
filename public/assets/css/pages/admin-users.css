@@ -1,0 +1,53 @@
+.admin-users-page {
+  width: 100%;
+}
+
+.admin-back-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.admin-users-card {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.admin-add-btn {
+  min-width: 100%;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.badge.rounded-pill {
+  padding: 0.45rem 0.75rem;
+  font-weight: 600;
+}
+
+.admin-users-page {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 991.98px) {
+  .admin-add-btn {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .admin-back-btn {
+    width: 34px;
+    height: 34px;
+  }
+}

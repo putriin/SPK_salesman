@@ -1,0 +1,19 @@
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.custom-header {
+  background: #4a81b3;
+  border-bottom: none;
+}
+
+.card-header h5 {
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .custom-header {
+    text-align: center;
+  }
+}

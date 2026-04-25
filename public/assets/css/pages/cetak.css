@@ -1,0 +1,16 @@
+.custom-header {
+  background: #4a81b3;
+}
+
+@media print {
+  .navbar,
+  .no-print {
+    display: none !important;
+  }
+
+  .card,
+  .card-body {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

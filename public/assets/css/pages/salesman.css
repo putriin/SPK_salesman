@@ -1,0 +1,81 @@
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.entries-select-custom {
+  width: 64px;
+}
+
+.search-group-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.search-input-custom {
+  width: 100%;
+  max-width: 420px;
+}
+
+.btn-edit-custom {
+  background: #fefd99;
+  color: #000;
+  border: 1px solid #e5df7a;
+  border-radius: 12px;
+  min-width: 70px;
+  font-weight: 600;
+}
+
+.btn-edit-custom:hover {
+  background: #f7f57d;
+  color: #000;
+}
+
+.btn-delete-custom {
+  background: #ff3737;
+  color: #fff;
+  border: 1px solid #e12b2b;
+  border-radius: 12px;
+  min-width: 70px;
+  font-weight: 600;
+}
+
+.btn-delete-custom:hover {
+  background: #eb2f2f;
+  color: #fff;
+}
+
+.btn-cancel-custom {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.btn-cancel-custom:hover {
+  background: #ff3737;
+  color: #fff;
+  border-color: #e12b2b;
+}
+
+.btn-cancel-custom:active {
+  background: #e12b2b;
+  color: #fff;
+}
+
+#tableBody td:last-child {
+  text-align: center;
+}
+
+.custom-header {
+  background: #4a81b3;
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .search-input-custom {
+    max-width: 100%;
+  }
+}
