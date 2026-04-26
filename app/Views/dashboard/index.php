@@ -9,7 +9,7 @@
 <?php
 $chartLabels = $chart['labels'] ?? [];
 $chartValues = $chart['values'] ?? [];
-$chartTitle = $chart['title'] ?? 'Grafik Kinerja Salesman Terbaik';
+$chartTitle = 'Grafik Kinerja Salesman Terbaik';
 
 $topSalesman = '-';
 $topValue = 0;
@@ -45,6 +45,7 @@ if (!empty($chartLabels) && !empty($chartValues)) {
                             <?php endforeach; ?>
                         </select>
                     </div>
+
                     <button type="submit" class="btn btn-light fw-semibold px-4">
                         Tampilkan
                     </button>
@@ -160,45 +161,6 @@ if (!empty($chartLabels) && !empty($chartValues)) {
                 <div class="manager-note mt-3">
                     Data mengikuti periode yang sedang dipilih dan tidak mengubah proses perhitungan.
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="manager-card mt-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-                <h5 class="fw-bold mb-1">Ringkasan Dashboard</h5>
-                <p class="text-muted mb-0">Akses cepat ke menu utama manajer.</p>
-            </div>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('salesman') ?>" class="manager-shortcut">
-                    <i class="bi bi-person-lines-fill"></i>
-                    <span>Kelola Salesman</span>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('kriteria') ?>" class="manager-shortcut">
-                    <i class="bi bi-sliders"></i>
-                    <span>Kelola Kriteria</span>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('penilaian') ?>" class="manager-shortcut">
-                    <i class="bi bi-pencil-square"></i>
-                    <span>Input Penilaian</span>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('perhitungan') ?>" class="manager-shortcut">
-                    <i class="bi bi-calculator-fill"></i>
-                    <span>Proses TOPSIS</span>
-                </a>
             </div>
         </div>
     </div>

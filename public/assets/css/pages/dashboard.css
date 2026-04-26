@@ -57,13 +57,21 @@
 .manager-icon-box {
   width: 48px;
   height: 48px;
+  min-width: 48px;
   border-radius: 15px;
   background: #eef4ff;
   color: #0d6efd;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
+}
+
+.manager-icon-box i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .manager-icon-box.trophy {
@@ -112,37 +120,11 @@
   font-size: 0.9rem;
 }
 
-.manager-shortcut {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px;
-  color: #111827;
-  font-weight: 600;
-  transition: 180ms ease;
-  background: #fff;
-}
-
-.manager-shortcut:hover {
-  border-color: #0d6efd;
-  color: #0d6efd;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(13, 110, 253, 0.12);
-}
-
-.manager-shortcut i {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: #eef4ff;
-  color: #0d6efd;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+.manager-shortcut,
+.manager-shortcut-wrapper,
+.manager-summary,
+.manager-summary-card {
+  display: none !important;
 }
 
 .dashboard-stat-card {
@@ -181,14 +163,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .manager-stat-card,
-  .dashboard-stat-card,
-  .manager-shortcut {
+  .dashboard-stat-card {
     transition: none;
   }
 
   .manager-stat-card:hover,
-  .dashboard-stat-card:hover,
-  .manager-shortcut:hover {
+  .dashboard-stat-card:hover {
     transform: none;
   }
 }
