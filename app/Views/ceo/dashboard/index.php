@@ -2,97 +2,6 @@
 
 <?= $this->section('page_css') ?>
 <link rel="stylesheet" href="<?= base_url('assets/css/pages/ceo-dashboard.css') ?>">
-<style>
-.ceo-hero {
-    background: linear-gradient(135deg, #0d6efd 0%, #3d8bfd 100%);
-    color: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.18);
-}
-
-.ceo-hero .form-label,
-.ceo-hero .small-muted {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-.ceo-hero .form-select,
-.ceo-hero .btn-light {
-    border: none;
-}
-
-.ceo-stat-card {
-    border: 0;
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ceo-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(16, 24, 40, 0.12);
-}
-
-.ceo-stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    background: #eef4ff;
-}
-
-.ceo-highlight-card,
-.ceo-chart-card,
-.ceo-table-card {
-    border: 0;
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
-}
-
-.ceo-highlight-card {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-}
-
-.ceo-badge-soft {
-    display: inline-block;
-    padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    background: #e8f3ec;
-    color: #198754;
-}
-
-.ceo-insight-box {
-    border: 1px solid #e9ecef;
-    border-radius: 0.9rem;
-    padding: 1rem;
-    background: #fff;
-}
-
-.ceo-chart-container {
-    position: relative;
-    min-height: 360px;
-}
-
-.ceo-chart-container canvas {
-    width: 100% !important;
-    height: 340px !important;
-}
-
-@media (max-width: 767.98px) {
-    .ceo-chart-container {
-        min-height: 300px;
-    }
-
-    .ceo-chart-container canvas {
-        height: 280px !important;
-    }
-}
-</style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
@@ -100,14 +9,14 @@
 $chartLabels = $chart['labels'] ?? [];
 $chartValues = $chart['values'] ?? [];
 $chartColors = $chart['colors'] ?? [];
-$chartTitle = $chart['title'] ?? 'Grafik Nilai Preferensi Salesman';
+$chartTitle = 'Grafik Nilai Preferensi Salesman';
 $topSalesmanName = $topSalesmanSummary['nama'] ?? '-';
 $topSalesmanCode = $topSalesmanSummary['kode'] ?? '-';
 $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
 ?>
 
 <div class="ceo-hero mb-4">
-    <div class="row g-3 align-items-end">
+    <div class="row g-3 align-items-center">
         <div class="col-lg-8">
             <div class="small-muted mb-2">Dashboard Eksekutif</div>
             <h2 class="fw-bold mb-2">Dashboard CEO</h2>
@@ -117,10 +26,10 @@ $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
             </p>
         </div>
 
-        <div class="col-lg-4">
-            <form method="get" action="<?= base_url('ceo/dashboard') ?>">
-                <label for="periode" class="form-label small mb-2">Pilih Periode</label>
-                <div class="d-flex gap-2">
+        <div class="col-lg-4 d-flex justify-content-lg-end align-items-center">
+            <form method="get" action="<?= base_url('ceo/dashboard') ?>" class="ceo-period-filter">
+                <div class="flex-grow-1">
+                    <label for="periode" class="form-label small mb-1">Pilih Periode</label>
                     <select name="periode" id="periode" class="form-select">
                         <?php foreach (($periodeOptions ?? []) as $periode): ?>
                         <option value="<?= esc($periode) ?>"
@@ -129,10 +38,11 @@ $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
                         </option>
                         <?php endforeach; ?>
                     </select>
-                    <button type="submit" class="btn btn-light fw-semibold px-3">
-                        Tampilkan
-                    </button>
                 </div>
+
+                <button type="submit" class="btn btn-light fw-semibold px-3">
+                    Tampilkan
+                </button>
             </form>
         </div>
     </div>
@@ -204,7 +114,10 @@ $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
                             Batang hijau menunjukkan nilai tertinggi.
                         </p>
                     </div>
-                    <span class="badge text-bg-light border">Periode <?= esc($selectedPeriode ?? '-') ?></span>
+
+                    <span class="badge text-bg-light border">
+                        Periode <?= esc($selectedPeriode ?? '-') ?>
+                    </span>
                 </div>
 
                 <div class="ceo-chart-container">
@@ -226,6 +139,7 @@ $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
 
                 <h4 class="fw-bold mb-1"><?= esc($topSalesmanName) ?></h4>
                 <div class="text-muted mb-2">Kode: <?= esc($topSalesmanCode) ?></div>
+
                 <div class="ceo-badge-soft mb-4">
                     Nilai Preferensi <?= !empty($chartValues) ? esc(number_format($topSalesmanValue, 4)) : '-' ?>
                 </div>
@@ -324,6 +238,7 @@ $topSalesmanValue = (float) ($topSalesmanSummary['preferensi'] ?? 0);
         </div>
     </div>
 </div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('page_js') ?>
