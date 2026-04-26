@@ -1,3 +1,150 @@
+.manager-dashboard-page {
+  min-height: calc(100vh - 120px);
+}
+
+.manager-hero {
+  background: linear-gradient(135deg, #0d6efd 0%, #3b82f6 55%, #60a5fa 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 18px 45px rgba(13, 110, 253, 0.22);
+}
+
+.manager-eyebrow {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.manager-filter {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
+.manager-stat-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.manager-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
+}
+
+.manager-stat-card p {
+  color: #6c757d;
+  margin-bottom: 6px;
+}
+
+.manager-stat-card h3 {
+  color: #111827;
+  font-weight: 800;
+  margin-bottom: 0;
+}
+
+.manager-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #eef4ff;
+  color: #0d6efd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.manager-icon-box.trophy {
+  background: #fff7e6;
+  color: #f59f00;
+}
+
+.manager-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.manager-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.chart-container {
+  position: relative;
+  min-height: 360px;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 340px !important;
+}
+
+.manager-highlight-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.manager-note {
+  background: #eef4ff;
+  color: #1d4ed8;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+}
+
+.manager-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  color: #111827;
+  font-weight: 600;
+  transition: 180ms ease;
+  background: #fff;
+}
+
+.manager-shortcut:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(13, 110, 253, 0.12);
+}
+
+.manager-shortcut i {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #eef4ff;
+  color: #0d6efd;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
 .dashboard-stat-card {
   transition:
     transform 180ms ease,
@@ -9,22 +156,39 @@
   box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
 }
 
-.chart-container {
-  position: relative;
-  min-height: 360px;
-}
+@media (max-width: 768px) {
+  .manager-hero {
+    padding: 22px;
+  }
 
-.chart-container canvas {
-  width: 100% !important;
-  height: 330px !important;
+  .manager-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manager-card {
+    padding: 18px;
+  }
+
+  .chart-container {
+    min-height: 300px;
+  }
+
+  .chart-container canvas {
+    height: 300px !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-stat-card {
+  .manager-stat-card,
+  .dashboard-stat-card,
+  .manager-shortcut {
     transition: none;
   }
 
-  .dashboard-stat-card:hover {
+  .manager-stat-card:hover,
+  .dashboard-stat-card:hover,
+  .manager-shortcut:hover {
     transform: none;
   }
 }
