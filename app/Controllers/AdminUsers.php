@@ -6,13 +6,15 @@ use App\Models\UserModel;
 
 class AdminUsers extends BaseController
 {
-    protected function checkAdmin()
+    protected function checkUser()
     {
         if (!session()->get('isLoggedIn')) {
             return redirect()->to('/login');
         }
 
-        if (session()->get('role') !== 'admin') {
+        $allowedRoles = ['admin', 'manajer', 'ceo'];
+
+        if (!in_array(session()->get('role'), $allowedRoles, true)) {
             return redirect()->to('/login');
         }
 
@@ -21,14 +23,14 @@ class AdminUsers extends BaseController
 
     public function index()
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
         $userModel = new UserModel();
 
         $data = [
-            'title'    => 'Semua User',
+            'title'    => 'Pengaturan User',
             'username' => session()->get('username'),
             'users'    => $userModel->orderBy('id', 'DESC')->findAll(),
             'filter'   => 'all',
@@ -39,20 +41,20 @@ class AdminUsers extends BaseController
 
     public function role($role = null)
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
         $allowedRoles = ['admin', 'manajer', 'ceo'];
 
         if (!in_array($role, $allowedRoles, true)) {
-            return redirect()->to('/admin/users');
+            return redirect()->to('/pengaturan-user');
         }
 
         $userModel = new UserModel();
 
         $data = [
-            'title'    => 'Data User ' . ucfirst($role),
+            'title'    => 'Pengaturan User ' . ucfirst($role),
             'username' => session()->get('username'),
             'users'    => $userModel->where('role', $role)->orderBy('id', 'DESC')->findAll(),
             'filter'   => $role,
@@ -63,7 +65,7 @@ class AdminUsers extends BaseController
 
     public function store()
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
@@ -76,7 +78,8 @@ class AdminUsers extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->back()->withInput()
+                ->with('errors', $this->validator->getErrors());
         }
 
         $userModel = new UserModel();
@@ -91,12 +94,13 @@ class AdminUsers extends BaseController
             'is_active'     => 1,
         ]);
 
-        return redirect()->to('/admin/users')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->to('/pengaturan-user')
+            ->with('success', 'User berhasil ditambahkan.');
     }
 
     public function updateRole($id)
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
@@ -105,26 +109,29 @@ class AdminUsers extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->with('errors', $this->validator->getErrors());
+            return redirect()->back()
+                ->with('errors', $this->validator->getErrors());
         }
 
         $userModel = new UserModel();
         $user = $userModel->find($id);
 
         if (!$user) {
-            return redirect()->to('/admin/users')->with('errors', ['user' => 'User tidak ditemukan.']);
+            return redirect()->to('/pengaturan-user')
+                ->with('errors', ['user' => 'User tidak ditemukan.']);
         }
 
         $userModel->update($id, [
             'role' => $this->request->getPost('role'),
         ]);
 
-        return redirect()->to('/admin/users')->with('success', 'Role user berhasil diperbarui.');
+        return redirect()->to('/pengaturan-user')
+            ->with('success', 'Role user berhasil diperbarui.');
     }
 
     public function resetPassword($id)
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
@@ -133,26 +140,29 @@ class AdminUsers extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->with('errors', $this->validator->getErrors());
+            return redirect()->back()
+                ->with('errors', $this->validator->getErrors());
         }
 
         $userModel = new UserModel();
         $user = $userModel->find($id);
 
         if (!$user) {
-            return redirect()->to('/admin/users')->with('errors', ['user' => 'User tidak ditemukan.']);
+            return redirect()->to('/pengaturan-user')
+                ->with('errors', ['user' => 'User tidak ditemukan.']);
         }
 
         $userModel->update($id, [
             'password_hash' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT),
         ]);
 
-        return redirect()->to('/admin/users')->with('success', 'Password user berhasil direset.');
+        return redirect()->to('/pengaturan-user')
+            ->with('success', 'Password user berhasil direset.');
     }
 
     public function delete($id)
     {
-        if ($redirect = $this->checkAdmin()) {
+        if ($redirect = $this->checkUser()) {
             return $redirect;
         }
 
@@ -160,17 +170,20 @@ class AdminUsers extends BaseController
         $user = $userModel->find($id);
 
         if (!$user) {
-            return redirect()->to('/admin/users')->with('errors', ['user' => 'User tidak ditemukan.']);
+            return redirect()->to('/pengaturan-user')
+                ->with('errors', ['user' => 'User tidak ditemukan.']);
         }
 
         if ((int) $user['id'] === (int) session()->get('user_id')) {
-            return redirect()->to('/admin/users')->with('errors', [
-                'user' => 'Akun yang sedang login tidak bisa dihapus.'
-            ]);
+            return redirect()->to('/pengaturan-user')
+                ->with('errors', [
+                    'user' => 'Akun yang sedang login tidak bisa dihapus.',
+                ]);
         }
 
         $userModel->delete($id);
 
-        return redirect()->to('/admin/users')->with('success', 'User berhasil dihapus.');
+        return redirect()->to('/pengaturan-user')
+            ->with('success', 'User berhasil dihapus.');
     }
 }

@@ -41,17 +41,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let pendingDeleteId = null;
 
+  function getNama(row) {
+    return row.nama ?? row.nama_kriteria ?? row.name ?? "";
+  }
+
+  function getJenis(row) {
+    return row.jenis ?? row.tipe ?? row.type ?? "";
+  }
+
+  function getBobot(row) {
+    return row.bobot ?? row.weight ?? "";
+  }
+
+  function getBobotNormalisasi(row) {
+    return row.bobot_normalisasi ?? row.normalized_weight ?? "0";
+  }
+
   function openModal(mode = "add", row = null) {
     if (!modalInstance) return;
 
     if (mode === "edit" && row) {
       if (modalTitle) modalTitle.textContent = "Edit Data";
       if (formId) formId.value = row.id ?? "";
-      if (formNama) formNama.value = row.nama ?? "";
-      if (formJenis) formJenis.value = String(row.jenis ?? "").toLowerCase();
-      if (formBobot) formBobot.value = row.bobot ?? "";
+      if (formNama) formNama.value = getNama(row);
+      if (formJenis) formJenis.value = String(getJenis(row)).toLowerCase();
+      if (formBobot) formBobot.value = getBobot(row);
     } else {
-      if (modalTitle) modalTitle.textContent = "Add Data";
+      if (modalTitle) modalTitle.textContent = "Tambah Data";
       modalForm?.reset();
       if (formId) formId.value = "";
     }
@@ -65,9 +81,13 @@ document.addEventListener("DOMContentLoaded", () => {
     pendingDeleteId = Number(row.id);
 
     if (deleteModalText) {
-      const nama = row.nama ?? "data ini";
-      const jenis = row.jenis ? ` (${row.jenis})` : "";
-      deleteModalText.textContent = `Yakin ingin menghapus kriteria "${nama}"${jenis}?`;
+      const nama = getNama(row) || "data ini";
+      deleteModalText.textContent = `Yakin ingin menghapus kriteria "${nama}"?`;
+    }
+
+    if (deleteConfirmBtn) {
+      deleteConfirmBtn.disabled = false;
+      deleteConfirmBtn.textContent = "Hapus";
     }
 
     deleteModalInstance.show();
@@ -84,15 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
           String(item.id ?? "")
             .toLowerCase()
             .includes(q) ||
-          String(item.nama ?? "")
-            .toLowerCase()
-            .includes(q) ||
-          String(item.jenis ?? "")
-            .toLowerCase()
-            .includes(q) ||
-          String(item.bobot ?? "")
-            .toLowerCase()
-            .includes(q)
+          String(getNama(item)).toLowerCase().includes(q) ||
+          String(getJenis(item)).toLowerCase().includes(q) ||
+          String(getBobot(item)).toLowerCase().includes(q) ||
+          String(getBobotNormalisasi(item)).toLowerCase().includes(q)
         );
       });
     }
@@ -118,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pageRows.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="5" class="text-center py-4 text-muted">
+          <td colspan="6" class="text-center py-4 text-muted">
             Data tidak ditemukan
           </td>
         </tr>
@@ -126,12 +141,18 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       tableBody.innerHTML = pageRows
         .map((row, index) => {
+          const nama = getNama(row);
+          const jenis = getJenis(row);
+          const bobot = getBobot(row);
+          const bobotNormalisasi = getBobotNormalisasi(row);
+
           return `
             <tr>
               <td class="text-center">${start + index + 1}</td>
-              <td>${escapeHtml(row.nama || "")}</td>
-              <td class="text-center">${escapeHtml(row.jenis || "")}</td>
-              <td class="text-center">${escapeHtml(row.bobot || "")}</td>
+              <td class="text-center fw-medium">${escapeHtml(nama)}</td>
+              <td class="text-center">${escapeHtml(capitalize(jenis))}</td>
+              <td class="text-center">${escapeHtml(bobot)}</td>
+              <td class="text-center">${escapeHtml(bobotNormalisasi)}</td>
               <td class="text-center">
                 <div class="d-inline-flex gap-2">
                   <button
@@ -139,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     type="button"
                     data-action="edit"
                     data-id="${escapeHtml(row.id)}"
+data-name="${escapeHtml(nama)}"
                   >
                     Edit
                   </button>
@@ -200,6 +222,11 @@ document.addEventListener("DOMContentLoaded", () => {
     pagination.innerHTML = html;
   }
 
+  function capitalize(value) {
+    const text = String(value || "");
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replaceAll("&", "&amp;")
@@ -228,8 +255,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (action === "edit") {
         openModal("edit", row);
       } else if (action === "delete") {
-        openDeleteModal(row);
+        openDeleteModal({
+          id: id,
+          nama: actionBtn.getAttribute("data-name") || getNama(row),
+        });
       }
+
       return;
     }
 
@@ -265,8 +296,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   deleteConfirmBtn?.addEventListener("click", () => {
-    if (!pendingDeleteId || !deleteForm || !deleteUrl) return;
-    deleteForm.action = `${deleteUrl}/${pendingDeleteId}`;
+    if (!pendingDeleteId || !deleteForm || !deleteUrl) {
+      alert("Data yang akan dihapus tidak ditemukan.");
+      return;
+    }
+
+    deleteConfirmBtn.disabled = true;
+    deleteConfirmBtn.textContent = "Menghapus...";
+
+    deleteForm.setAttribute("method", "post");
+    deleteForm.setAttribute("action", `${deleteUrl}/${pendingDeleteId}`);
     deleteForm.submit();
   });
 
@@ -277,6 +316,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   deleteModalElement?.addEventListener("hidden.bs.modal", () => {
     pendingDeleteId = null;
+
+    if (deleteConfirmBtn) {
+      deleteConfirmBtn.disabled = false;
+      deleteConfirmBtn.textContent = "Hapus";
+    }
   });
 
   renderTable();

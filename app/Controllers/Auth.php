@@ -98,7 +98,7 @@ class Auth extends BaseController
 
         session()->regenerate();
 
-        return $this->redirectByRole($user['role']);
+        return $this->redirectToDashboard($user['role']);
     }
 
     public function googleLogin()
@@ -112,6 +112,7 @@ class Auth extends BaseController
         }
 
         $clientId = env('google.clientId');
+
         if (!$clientId) {
             return redirect()->to('/login')->with('errors', [
                 'login' => 'Google Client ID belum diatur di file .env.',
@@ -140,7 +141,7 @@ class Auth extends BaseController
         }
 
         $userModel = new UserModel();
-        $user = $userModel->findActiveByEmail($email);
+        $user      = $userModel->findActiveByEmail($email);
 
         if (!$user) {
             return redirect()->to('/login')->with('errors', [
@@ -164,29 +165,28 @@ class Auth extends BaseController
 
         session()->regenerate();
 
-        return $this->redirectByRole($user['role']);
+        return $this->redirectToDashboard($user['role']);
     }
 
     public function logout()
     {
         session()->destroy();
+
         return redirect()->to('/login');
     }
 
-    private function redirectByRole(string $role)
+    private function redirectToDashboard(string $role)
     {
-        switch ($role) {
-            case 'admin':
-                return redirect()->to('/admin/dashboard');
-            case 'manajer':
-                return redirect()->to('/dashboard');
-            case 'ceo':
-                return redirect()->to('/ceo/dashboard');
-            default:
-                session()->destroy();
-                return redirect()->to('/login')->with('errors', [
-                    'login' => 'Role user tidak diizinkan.',
-                ]);
+        $allowedRoles = ['admin', 'manajer', 'ceo'];
+
+        if (in_array($role, $allowedRoles, true)) {
+            return redirect()->to('/dashboard');
         }
+
+        session()->destroy();
+
+        return redirect()->to('/login')->with('errors', [
+            'login' => 'Role user tidak diizinkan.',
+        ]);
     }
 }

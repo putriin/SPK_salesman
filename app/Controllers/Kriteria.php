@@ -20,26 +20,41 @@ class Kriteria extends BaseController
         $rows = [];
         $no = 1;
 
+        // Total bobot input, dipakai untuk menampilkan bobot normalisasi
+        $totalBobot = array_sum(array_map(static function ($item) {
+            return (float) ($item['bobot'] ?? 0);
+        }, $kriteria));
+
         foreach ($kriteria as $item) {
             $nama = $item['nama_kriteria'] ?? '';
             $tipe = $item['tipe'] ?? '';
-            $bobot = $this->formatBobot($item['bobot'] ?? 0);
+
+            // Bobot asli/input
+            $bobotRaw = (float) ($item['bobot'] ?? 0);
+            $bobot = $this->formatBobot($bobotRaw);
+
+            // Bobot normalisasi agar total bobot menjadi 1
+            $bobotNormalisasi = $totalBobot > 0
+                ? $this->formatBobot($bobotRaw / $totalBobot)
+                : '0';
 
             $rows[] = [
                 'no' => $no++,
                 'id' => $item['id'],
 
                 // field utama
-                'nama_kriteria' => $nama,
-                'tipe'          => $tipe,
-                'bobot'         => $bobot,
+                'nama_kriteria'       => $nama,
+                'tipe'                => $tipe,
+                'bobot'               => $bobot,
+                'bobot_normalisasi'   => $bobotNormalisasi,
 
-                // alias tambahan biar cocok dengan JS lama/baru
-                'nama'          => $nama,
-                'name'          => $nama,
-                'jenis'         => $tipe,
-                'type'          => $tipe,
-                'weight'        => $bobot,
+                // alias tambahan
+                'nama'                => $nama,
+                'name'                => $nama,
+                'jenis'               => $tipe,
+                'type'                => $tipe,
+                'weight'              => $bobot,
+                'normalized_weight'   => $bobotNormalisasi,
             ];
         }
 
@@ -55,6 +70,7 @@ class Kriteria extends BaseController
     {
         $value = trim((string) $value);
         $value = str_replace(',', '.', $value);
+
         return (float) $value;
     }
 
@@ -63,7 +79,7 @@ class Kriteria extends BaseController
         $value = trim((string) $value);
         $value = str_replace(',', '.', $value);
 
-        return is_numeric($value);
+        return is_numeric($value) && (float) $value > 0;
     }
 
     private function formatBobot($value): string
@@ -72,6 +88,25 @@ class Kriteria extends BaseController
         $formatted = rtrim(rtrim(number_format($value, 9, '.', ''), '0'), '.');
 
         return $formatted === '' ? '0' : $formatted;
+    }
+
+    private function generateKodeKriteria(): string
+    {
+        $last = $this->kriteriaModel
+            ->select('kode_kriteria')
+            ->where('kode_kriteria IS NOT NULL')
+            ->where('kode_kriteria !=', '')
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        if (!$last || empty($last['kode_kriteria'])) {
+            return 'C1';
+        }
+
+        $lastNumber = (int) preg_replace('/[^0-9]/', '', $last['kode_kriteria']);
+        $nextNumber = $lastNumber + 1;
+
+        return 'C' . $nextNumber;
     }
 
     public function save()
@@ -90,7 +125,7 @@ class Kriteria extends BaseController
         }
 
         if (!$this->isValidBobot($bobotInput)) {
-            return redirect()->back()->withInput()->with('error', 'Bobot harus berupa angka yang valid.');
+            return redirect()->back()->withInput()->with('error', 'Bobot harus berupa angka positif. Contoh: 1, 3, atau 5.');
         }
 
         $bobot = $this->normalizeBobot($bobotInput);
@@ -112,6 +147,9 @@ class Kriteria extends BaseController
 
             return redirect()->to('/kriteria')->with('success', 'Data kriteria berhasil diperbarui.');
         }
+
+        // Kode kriteria dibuat otomatis hanya saat tambah data baru
+        $data['kode_kriteria'] = $this->generateKodeKriteria();
 
         $this->kriteriaModel->insert($data);
 

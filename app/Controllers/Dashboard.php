@@ -6,6 +6,7 @@ use App\Models\HasilPerhitunganModel;
 use App\Models\KriteriaModel;
 use App\Models\PenilaianModel;
 use App\Models\SalesmanModel;
+use App\Models\UserModel;
 
 class Dashboard extends BaseController
 {
@@ -15,9 +16,11 @@ class Dashboard extends BaseController
             return redirect()->to('/login');
         }
 
-        if (session()->get('role') !== 'manajer') {
+        $allowedRoles = ['admin', 'manajer', 'ceo'];
+
+        if (!in_array(session()->get('role'), $allowedRoles, true)) {
             return redirect()->to('/login')->with('errors', [
-                'login' => 'Halaman ini hanya untuk manajer.',
+                'login' => 'Role user tidak diizinkan.',
             ]);
         }
 
@@ -25,11 +28,16 @@ class Dashboard extends BaseController
         $kriteriaModel = new KriteriaModel();
         $penilaianModel = new PenilaianModel();
         $hasilModel = new HasilPerhitunganModel();
+        $userModel = new UserModel();
 
         $totalSalesman = $salesmanModel->countAllResults();
         $totalKriteria = $kriteriaModel->countAllResults();
-        $totalNilai = $penilaianModel->select('salesman_id, periode')->distinct()->countAllResults();
+        $totalNilai = $penilaianModel
+            ->select('salesman_id, periode')
+            ->distinct()
+            ->countAllResults();
         $totalHasilAkhir = $hasilModel->countAllResults();
+        $totalUser = $userModel->countAllResults();
 
         $periodeRows = $hasilModel
             ->select('periode')
@@ -50,6 +58,7 @@ class Dashboard extends BaseController
         $chartLabels = [];
         $chartValues = [];
         $chartTitle = 'Grafik Kinerja Salesman Terbaik';
+
         $topCriteriaInsight = [
             'nama_kriteria' => '-',
             'nilai_tertinggi' => '-',
@@ -101,13 +110,14 @@ class Dashboard extends BaseController
         }
 
         return view('dashboard/index', [
-            'title' => 'Dashboard Manajer',
-            'username' => session()->get('username') ?? 'Manajer',
+            'title' => 'Dashboard',
+            'username' => session()->get('username') ?? 'User',
             'stats' => [
                 'salesman' => $totalSalesman,
                 'kriteria' => $totalKriteria,
                 'nilai' => $totalNilai,
                 'hasilAkhir' => $totalHasilAkhir,
+                'user' => $totalUser,
             ],
             'chart' => [
                 'labels' => $chartLabels,

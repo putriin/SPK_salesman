@@ -6,21 +6,33 @@
 
 <?= $this->section('content') ?>
 
-<section class="card shadow-sm border-0">
-    <div
-        class="card-header custom-header text-white d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 py-3">
-        <div class="d-flex align-items-center gap-3">
-            <a href="<?= base_url('penilaian') ?>" class="btn btn-light btn-sm rounded-3 px-2">
+<?php
+$detailData = isset($detail) && is_array($detail) ? $detail : [];
+$nilaiRows = isset($detailData['nilai']) && is_array($detailData['nilai']) ? $detailData['nilai'] : [];
+
+$periode = isset($detailData['periode']) ? (string) $detailData['periode'] : '-';
+$salesman = isset($detailData['salesman']) ? (string) $detailData['salesman'] : '-';
+$salesmanId = isset($detailData['salesman_id']) ? (string) $detailData['salesman_id'] : '';
+$totalKriteria = count($nilaiRows);
+?>
+
+<section class="card border-0 shadow-sm">
+    <div class="card-header bg-light border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <a href="<?= base_url('penilaian') ?>" class="btn btn-outline-secondary btn-sm">
                 ←
             </a>
-            <h4 class="mb-0 fw-bold">DETAIL PENILAIAN</h4>
+
+            <h5 class="mb-0 fw-semibold text-dark">
+                Detail Penilaian Kinerja
+            </h5>
         </div>
     </div>
 
     <div class="card-body">
         <?php if (session()->getFlashdata('success')): ?>
         <div class="alert alert-success mb-3">
-            <?= esc(session()->getFlashdata('success')) ?>
+            <?= esc((string) session()->getFlashdata('success')) ?>
         </div>
         <?php endif; ?>
 
@@ -29,7 +41,7 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Periode</div>
-                        <div class="fw-semibold"><?= esc($detail['periode'] ?? '-') ?></div>
+                        <div class="fw-semibold"><?= esc($periode) ?></div>
                     </div>
                 </div>
             </div>
@@ -38,7 +50,7 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Salesman</div>
-                        <div class="fw-semibold"><?= esc($detail['salesman'] ?? '-') ?></div>
+                        <div class="fw-semibold"><?= esc($salesman) ?></div>
                     </div>
                 </div>
             </div>
@@ -47,7 +59,7 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Total Kriteria</div>
-                        <div class="fw-semibold"><?= count($detail['nilai'] ?? []) ?></div>
+                        <div class="fw-semibold"><?= esc((string) $totalKriteria) ?></div>
                     </div>
                 </div>
             </div>
@@ -56,46 +68,54 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Status</div>
-                        <div>
-                            <span class="badge bg-success">Lengkap</span>
-                        </div>
+                        <span class="badge bg-success">Lengkap</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
+            <div class="card-header bg-light border-bottom">
                 <h5 class="mb-1 fw-semibold">Detail Nilai Kriteria</h5>
-                <p class="mb-0 text-muted small">Berikut rincian nilai salesman terhadap setiap kriteria.</p>
+                <p class="mb-0 text-muted small">
+                    Berikut rincian nilai kinerja salesman terhadap setiap kriteria.
+                </p>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover align-middle mb-0">
-                    <thead class="table-primary text-center">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                    <thead class="table-light text-center">
                         <tr>
-                            <th style="width:60px;">No</th>
-                            <th>Criteria Name</th>
-                            <th style="width:160px;">Criteria Type</th>
-                            <th style="width:160px;">Weight</th>
-                            <th style="width:160px;">Score</th>
+                            <th style="width: 60px;">No</th>
+                            <th style="width: 40%;">Nama Kriteria</th>
+                            <th style="width: 15%;">Tipe</th>
+                            <th style="width: 15%;">Bobot</th>
+                            <th style="width: 30%;">Nilai</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        <?php if (!empty($detail['nilai'])): ?>
-                        <?php foreach ($detail['nilai'] as $i => $n): ?>
+                        <?php if (!empty($nilaiRows)): ?>
+                        <?php foreach ($nilaiRows as $index => $row): ?>
+                        <?php
+                                $namaKriteria = is_array($row) && isset($row['kriteria']) ? (string) $row['kriteria'] : '-';
+                                $jenis = is_array($row) && isset($row['jenis']) ? (string) $row['jenis'] : '-';
+                                $bobot = is_array($row) && isset($row['bobot']) ? (string) $row['bobot'] : '-';
+                                $score = is_array($row) && isset($row['score']) ? (string) $row['score'] : '-';
+                                ?>
+
                         <tr>
-                            <td class="text-center"><?= $i + 1 ?></td>
-                            <td><?= esc($n['kriteria']) ?></td>
-                            <td class="text-center"><?= esc($n['jenis']) ?></td>
-                            <td class="text-center"><?= esc($n['bobot']) ?></td>
-                            <td class="text-center"><?= esc($n['score']) ?></td>
+                            <td class="text-center"><?= esc((string) ($index + 1)) ?></td>
+                            <td class="text-start ps-3 fw-medium"><?= esc($namaKriteria) ?></td>
+                            <td class="text-center"><?= esc(ucfirst($jenis)) ?></td>
+                            <td class="text-center"><?= esc($bobot) ?></td>
+                            <td class="text-center"><?= esc($score) ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php else: ?>
                         <tr>
                             <td colspan="5" class="text-center py-4 text-muted">
-                                Belum ada detail penilaian.
+                                Belum ada detail penilaian kinerja.
                             </td>
                         </tr>
                         <?php endif; ?>
@@ -105,15 +125,16 @@
         </div>
 
         <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
-            <a href="<?= base_url('penilaian') ?>" class="btn btn-cancel-custom">Kembali</a>
+            <a href="<?= base_url('penilaian') ?>" class="btn btn-outline-secondary">
+                Kembali
+            </a>
 
-            <a href="<?= base_url('penilaian?edit=1&salesman_id=' . $detail['salesman_id'] . '&periode=' . urlencode($detail['periode'])) ?>"
-                class="btn btn-edit-custom">
+            <a href="<?= base_url('penilaian?edit=1&salesman_id=' . urlencode($salesmanId) . '&periode=' . urlencode($periode)) ?>"
+                class="btn btn-warning text-white">
                 Edit Penilaian
             </a>
 
-            <a href="<?= base_url('perhitungan?periode=' . urlencode($detail['periode'] ?? '')) ?>"
-                class="btn btn-primary">
+            <a href="<?= base_url('perhitungan?periode=' . urlencode($periode)) ?>" class="btn btn-primary">
                 Proses Perhitungan
             </a>
         </div>

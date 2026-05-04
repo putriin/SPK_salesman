@@ -17,17 +17,22 @@ $routes->post('signup', 'Auth::attemptSignup');
 $routes->get('dashboard', 'Dashboard::index');
 $routes->get('logout', 'Auth::logout');
 
-$routes->get('admin/dashboard', 'AdminDashboard::index');
+//pengaturan user//
+$routes->get('pengaturan-user', 'AdminUsers::index');
+$routes->get('pengaturan-user/(:segment)', 'AdminUsers::role/$1');
+
+$routes->post('pengaturan-user/store', 'AdminUsers::store');
+$routes->post('pengaturan-user/update-role/(:num)', 'AdminUsers::updateRole/$1');
+$routes->post('pengaturan-user/reset-password/(:num)', 'AdminUsers::resetPassword/$1');
+$routes->post('pengaturan-user/delete/(:num)', 'AdminUsers::delete/$1');
+
+// Route lama diarahkan ke route baru. //
+$routes->get('admin/dashboard', 'Dashboard::index');
+$routes->get('ceo/dashboard', 'Dashboard::index');
+$routes->get('ceo/laporan', 'Cetak::index');
+
 $routes->get('admin/users', 'AdminUsers::index');
 $routes->get('admin/users/(:segment)', 'AdminUsers::role/$1');
-
-$routes->get('ceo/dashboard', 'CeoDashboard::index');
-$routes->get('ceo/laporan', 'CeoDashboard::laporan');
-
-$routes->post('admin/users/store', 'AdminUsers::store');
-$routes->post('admin/users/update-role/(:num)', 'AdminUsers::updateRole/$1');
-$routes->post('admin/users/reset-password/(:num)', 'AdminUsers::resetPassword/$1');
-$routes->post('admin/users/delete/(:num)', 'AdminUsers::delete/$1');
 
 $routes->get('salesman', 'Salesman::index');
 $routes->post('salesman/save', 'Salesman::save');
