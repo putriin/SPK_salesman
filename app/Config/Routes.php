@@ -47,6 +47,8 @@ $routes->post('penilaian/save', 'Penilaian::save');
 $routes->get('penilaian/detail/(:num)/(:segment)', 'Penilaian::detail/$1/$2');
 $routes->get('penilaian/edit', 'Penilaian::index');
 
+$routes->get('penilaian/delete/(:num)/(:segment)', 'Penilaian::delete/$1/$2');
+
 $routes->get('perhitungan', 'Perhitungan::index');
 $routes->post('perhitungan/process', 'Perhitungan::process');
 
