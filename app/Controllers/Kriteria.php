@@ -10,17 +10,19 @@ class Kriteria extends BaseController
 
     public function __construct()
     {
+        // Inisialisasi model Kriteria
         $this->kriteriaModel = new KriteriaModel();
     }
 
+    /**
+     * Menampilkan daftar kriteria
+     */
     public function index()
     {
         $kriteria = $this->kriteriaModel->orderBy('id', 'ASC')->findAll();
-
         $rows = [];
         $no = 1;
 
-        // Total bobot input, dipakai untuk menampilkan bobot normalisasi
         $totalBobot = array_sum(array_map(static function ($item) {
             return (float) ($item['bobot'] ?? 0);
         }, $kriteria));
@@ -29,11 +31,9 @@ class Kriteria extends BaseController
             $nama = $item['nama_kriteria'] ?? '';
             $tipe = $item['tipe'] ?? '';
 
-            // Bobot asli/input
             $bobotRaw = (float) ($item['bobot'] ?? 0);
             $bobot = $this->formatBobot($bobotRaw);
 
-            // Bobot normalisasi agar total bobot menjadi 1
             $bobotNormalisasi = $totalBobot > 0
                 ? $this->formatBobot($bobotRaw / $totalBobot)
                 : '0';
@@ -41,20 +41,16 @@ class Kriteria extends BaseController
             $rows[] = [
                 'no' => $no++,
                 'id' => $item['id'],
-
-                // field utama
-                'nama_kriteria'       => $nama,
-                'tipe'                => $tipe,
-                'bobot'               => $bobot,
-                'bobot_normalisasi'   => $bobotNormalisasi,
-
-                // alias tambahan
-                'nama'                => $nama,
-                'name'                => $nama,
-                'jenis'               => $tipe,
-                'type'                => $tipe,
-                'weight'              => $bobot,
-                'normalized_weight'   => $bobotNormalisasi,
+                'nama_kriteria' => $nama,
+                'tipe' => $tipe,
+                'bobot' => $bobot,
+                'bobot_normalisasi' => $bobotNormalisasi,
+                'nama' => $nama,
+                'name' => $nama,
+                'jenis' => $tipe,
+                'type' => $tipe,
+                'weight' => $bobot,
+                'normalized_weight' => $bobotNormalisasi,
             ];
         }
 
@@ -70,7 +66,6 @@ class Kriteria extends BaseController
     {
         $value = trim((string) $value);
         $value = str_replace(',', '.', $value);
-
         return (float) $value;
     }
 
@@ -78,7 +73,6 @@ class Kriteria extends BaseController
     {
         $value = trim((string) $value);
         $value = str_replace(',', '.', $value);
-
         return is_numeric($value) && (float) $value > 0;
     }
 
@@ -86,7 +80,6 @@ class Kriteria extends BaseController
     {
         $value = (float) $value;
         $formatted = rtrim(rtrim(number_format($value, 9, '.', ''), '0'), '.');
-
         return $formatted === '' ? '0' : $formatted;
     }
 
@@ -104,11 +97,15 @@ class Kriteria extends BaseController
         }
 
         $lastNumber = (int) preg_replace('/[^0-9]/', '', $last['kode_kriteria']);
-        $nextNumber = $lastNumber + 1;
-
-        return 'C' . $nextNumber;
+        return 'C' . ($lastNumber + 1);
     }
 
+    /**
+     * Simpan / update kriteria
+     * - Insert jika id kosong
+     * - Update jika id ada
+     * - Normalisasi bobot otomatis
+     */
     public function save()
     {
         $id = $this->request->getPost('id');
@@ -125,61 +122,59 @@ class Kriteria extends BaseController
         }
 
         if (!$this->isValidBobot($bobotInput)) {
-            return redirect()->back()->withInput()->with('error', 'Bobot harus berupa angka positif. Contoh: 1, 3, atau 5.');
+            return redirect()->back()->withInput()->with('error', 'Bobot harus angka positif.');
         }
 
         $bobot = $this->normalizeBobot($bobotInput);
 
         $data = [
             'nama_kriteria' => $namaKriteria,
-            'tipe'          => $tipe,
-            'bobot'         => $bobot,
+            'tipe' => $tipe,
+            'bobot' => $bobot,
         ];
 
         if (!empty($id)) {
             $existing = $this->kriteriaModel->find($id);
-
             if (!$existing) {
                 return redirect()->to('/kriteria')->with('error', 'Data kriteria tidak ditemukan.');
             }
-
             $this->kriteriaModel->update($id, $data);
-
-            return redirect()->to('/kriteria')->with('success', 'Data kriteria berhasil diperbarui.');
+        } else {
+            $data['kode_kriteria'] = $this->generateKodeKriteria();
+            $this->kriteriaModel->insert($data);
         }
 
-        // Kode kriteria dibuat otomatis hanya saat tambah data baru
-        $data['kode_kriteria'] = $this->generateKodeKriteria();
+        // Normalisasi bobot otomatis
+        $allCriteria = $this->kriteriaModel->findAll();
+        $totalBobot = array_sum(array_column($allCriteria, 'bobot'));
 
-        $this->kriteriaModel->insert($data);
+        foreach ($allCriteria as $kriteria) {
+            $normalized = $totalBobot > 0 ? $kriteria['bobot'] / $totalBobot : 0;
+            $this->kriteriaModel->update($kriteria['id'], [
+                'bobot_normalisasi' => $normalized
+            ]);
+        }
 
-        return redirect()->to('/kriteria')->with('success', 'Data kriteria berhasil ditambahkan.');
+        return redirect()->to('/kriteria')->with('success', 'Data kriteria berhasil disimpan dan bobot normalisasi diperbarui.');
     }
 
-    public function store()
-    {
-        return $this->save();
-    }
+    public function store() { return $this->save(); }
 
     public function update($id = null)
     {
         if ($id !== null && !$this->request->getPost('id')) {
             $_POST['id'] = $id;
         }
-
         return $this->save();
     }
 
     public function delete($id)
     {
         $existing = $this->kriteriaModel->find($id);
-
         if (!$existing) {
             return redirect()->to('/kriteria')->with('error', 'Data kriteria tidak ditemukan.');
         }
-
-        $this->kriteriaModel->delete($id);
-
+        $this->kriteriaModel->delete($id,true); // hapus permanen
         return redirect()->to('/kriteria')->with('success', 'Data kriteria berhasil dihapus.');
     }
 }
