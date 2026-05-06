@@ -1,69 +1,258 @@
-# CodeIgniter 4 Application Starter
+# SPK Salesman Hamasa
 
-## What is CodeIgniter?
+Sistem Pendukung Keputusan (SPK) Penilaian Kinerja Salesman menggunakan metode TOPSIS berbasis web.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+---
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## Tentang Project
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+Project ini dibuat untuk membantu proses penilaian kinerja salesman secara objektif dan terstruktur menggunakan metode TOPSIS (Technique for Order Preference by Similarity to Ideal Solution).
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+Sistem dapat melakukan:
 
-## Installation & updates
+- Pengelolaan data salesman
+- Pengelolaan data kriteria
+- Input penilaian kinerja
+- Proses perhitungan TOPSIS otomatis
+- Perankingan salesman terbaik
+- Cetak laporan hasil perhitungan
+- Pengaturan user dan role
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+---
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+## Fitur Sistem
 
-## Setup
+### Authentication
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+- Login manual
+- Login Google
+- Show / Hide password
+- Multi role user
 
-## Important Change with index.php
+### Dashboard
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+- Dashboard Admin
+- Dashboard CEO
+- Dashboard Manajer
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+### Data Master
 
-**Please** read the user guide for a better explanation of how CI4 works!
+- Data Salesman
+- Data Kriteria
+- Pengaturan Bobot Kriteria
 
-## Repository Management
+### Penilaian
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+- Input nilai penilaian salesman
+- Riwayat penilaian per periode
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+### Perhitungan TOPSIS
 
-## Server Requirements
+- Matriks keputusan
+- Normalisasi matriks
+- Matriks ternormalisasi terbobot
+- Solusi ideal positif dan negatif
+- Perhitungan jarak solusi
+- Nilai preferensi
+- Ranking alternatif
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+### Laporan
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+- Cetak hasil TOPSIS
+- Laporan ranking salesman
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+### User Management
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+- Tambah user
+- Reset password
+- Pengaturan role
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+---
+
+# Metode yang Digunakan
+
+## TOPSIS
+
+Technique for Order Preference by Similarity to Ideal Solution
+
+Tahapan metode TOPSIS pada sistem ini:
+
+1. Menentukan matriks keputusan
+2. Melakukan normalisasi matriks
+3. Menghitung matriks normalisasi terbobot
+4. Menentukan solusi ideal positif dan negatif
+5. Menghitung jarak setiap alternatif
+6. Menghitung nilai preferensi
+7. Menentukan ranking alternatif terbaik
+
+---
+
+# Teknologi yang Digunakan
+
+- PHP 8
+- CodeIgniter 4
+- MySQL
+- Bootstrap 5
+- JavaScript
+- HTML
+- CSS
+
+---
+
+# Struktur Project
+
+```text
+spk-Topsisalesman/
+│
+├── app/
+├── public/
+├── writable/
+├── vendor/
+├── database/
+│   └── spk_topsis.sql
+├── .env
+├── composer.json
+└── README.md
+```
+
+---
+
+# Cara Menjalankan Project
+
+## 1. Clone Repository
+
+```bash
+git clone https://github.com/putriin/SPK_salesman.git
+```
+
+---
+
+## 2. Masuk ke Folder Project
+
+```bash
+cd spk-Topsisalesman
+```
+
+---
+
+## 3. Install Dependency
+
+```bash
+composer install
+```
+
+---
+
+## 4. Import Database
+
+Import file database berikut ke phpMyAdmin:
+
+```text
+database/spk_topsis.sql
+```
+
+Langkah import:
+
+1. Buka phpMyAdmin
+2. Buat database baru dengan nama:
+   `spk_topsis`
+3. Klik tab Import
+4. Pilih file:
+   `database/spk_topsis.sql`
+5. Klik Go
+
+---
+
+## 5. Konfigurasi File .env
+
+Buka file `.env`
+
+Lalu sesuaikan konfigurasi database:
+
+```env
+database.default.hostname = localhost
+database.default.database = spk_topsis
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+```
+
+---
+
+## 6. Jalankan Project
+
+```bash
+php spark serve
+```
+
+Akses melalui browser:
+
+```text
+http://localhost:8080
+```
+
+---
+
+# Tampilan Sistem
+
+## Halaman Login
+
+- Login manual
+- Login Google
+- Show / hide password
+
+## Dashboard
+
+Menampilkan ringkasan data sistem.
+
+## Data Salesman
+
+Mengelola data alternatif salesman.
+
+## Data Kriteria
+
+Mengelola data kriteria dan bobot.
+
+## Penilaian Kinerja
+
+Input nilai salesman berdasarkan kriteria.
+
+## Perhitungan TOPSIS
+
+Menampilkan proses perhitungan TOPSIS secara detail:
+
+- Matriks keputusan
+- Normalisasi
+- Bobot
+- Solusi ideal
+- Ranking
+
+## Laporan
+
+Cetak hasil ranking salesman terbaik.
+
+---
+
+# Role User
+
+| Role       | Hak Akses                 |
+| ---------- | ------------------------- |
+| IT Support | Full akses sistem         |
+| Manajer    | Penilaian dan monitoring  |
+| CEO        | Melihat hasil dan laporan |
+
+---
+
+# Author
+
+## Putri Indaryani
+
+Project Skripsi  
+Sistem Pendukung Keputusan Penilaian Kinerja Salesman Menggunakan Metode TOPSIS
+
+---
+
+# Lisensi
+
+Project ini dibuat untuk kebutuhan pembelajaran dan skripsi.
