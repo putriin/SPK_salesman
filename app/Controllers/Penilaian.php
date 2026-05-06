@@ -24,9 +24,17 @@ class Penilaian extends BaseController
         $salesmen = $this->salesmanModel->orderBy('nama', 'ASC')->findAll() ?? [];
 
         $kriteria = $this->kriteriaModel
-            ->select('id, nama_kriteria as nama, tipe as jenis, bobot')
-            ->orderBy('id', 'ASC')
-            ->findAll() ?? [];
+    ->select('id, nama_kriteria as nama, tipe as jenis, bobot')
+    ->orderBy("
+        CASE
+            WHEN nama_kriteria = 'Kedisiplinan' THEN 1
+            WHEN nama_kriteria = 'Close Order' THEN 2
+            WHEN nama_kriteria = 'Tanggung Jawab' THEN 3
+            WHEN nama_kriteria = 'Product Knowledge' THEN 4
+            ELSE 99
+        END
+    ", '', false)
+    ->findAll() ?? [];
 
         $editData = [];
         $editSalesmanId = $this->request->getGet('salesman_id');

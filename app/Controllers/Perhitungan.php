@@ -18,12 +18,14 @@ class Perhitungan extends BaseController
         }
 
         $periodOptions = $this->getPeriodeOptions();
+
         $periode = $this->request->getGet('periode')
             ?: ($periodOptions[0] ?? date('Y-m'));
 
         $currentData = $this->buildCurrentCalculationData($periode);
         $snapshotRow = $this->getSnapshotRow($periode);
         $snapshotData = $this->decodeSnapshot($snapshotRow['snapshot_json'] ?? null);
+
         $hasSnapshot = !empty($snapshotData);
         $isStale = $hasSnapshot && ($snapshotRow['source_hash'] ?? '') !== $currentData['source_hash'];
 
@@ -52,8 +54,10 @@ class Perhitungan extends BaseController
         }
 
         $periode = trim((string) $this->request->getPost('periode'));
+
         if ($periode === '') {
-            return redirect()->to(base_url('perhitungan'))->with('error', 'Periode wajib dipilih.');
+            return redirect()->to(base_url('perhitungan'))
+                ->with('error', 'Periode wajib dipilih.');
         }
 
         $currentData = $this->buildCurrentCalculationData($periode);
@@ -88,27 +92,27 @@ class Perhitungan extends BaseController
     private function getPeriodeOptions(): array
     {
         $penilaianModel = new PenilaianModel();
-        $snapshotModel = new PerhitunganSnapshotModel();
 
+        // Ambil periode hanya dari data penilaian yang masih aktif.
+        // Kalau PenilaianModel memakai useSoftDeletes = true,
+        // data yang deleted_at-nya terisi otomatis tidak ikut.
         $fromPenilaian = $penilaianModel
             ->select('periode')
             ->distinct()
-            ->findAll();
-
-        $fromSnapshot = $snapshotModel
-            ->select('periode')
-            ->distinct()
+            ->orderBy('periode', 'DESC')
             ->findAll();
 
         $periods = [];
-        foreach (array_merge($fromPenilaian, $fromSnapshot) as $row) {
+
+        foreach ($fromPenilaian as $row) {
             if (!empty($row['periode'])) {
-                $periods[$row['periode']] = $row['periode'];
+                $periods[] = $row['periode'];
             }
         }
 
         rsort($periods);
-        return array_values($periods);
+
+        return array_values(array_unique($periods));
     }
 
     private function buildCurrentCalculationData(string $periode): array
@@ -118,26 +122,61 @@ class Perhitungan extends BaseController
         $penilaianModel = new PenilaianModel();
         $topsisService = new TopsisService();
 
-        $criteriaRaw = $kriteriaModel->orderBy('id', 'ASC')->findAll();
+        $criteriaRaw = $kriteriaModel
+    ->orderBy("
+        CASE
+            WHEN nama_kriteria = 'Kedisiplinan' THEN 1
+            WHEN nama_kriteria = 'Close Order' THEN 2
+            WHEN nama_kriteria = 'Tanggung Jawab' THEN 3
+            WHEN nama_kriteria = 'Product Knowledge' THEN 4
+            ELSE 99
+        END
+    ", '', false)
+    ->findAll();
+
         $criteria = [];
+
         foreach ($criteriaRaw as $row) {
             $criteria[] = [
-                'id'    => $row['id'],
-                'kode'  => $row['kode_kriteria'] ?? $row['kode'] ?? '',
-                'nama'  => $row['nama_kriteria'] ?? $row['nama'] ?? '',
+                'id' => $row['id'],
+                'kode' => $row['kode_kriteria'] ?? $row['kode'] ?? '',
+                'nama' => $row['nama_kriteria'] ?? $row['nama'] ?? '',
                 'bobot' => (float) ($row['bobot'] ?? 0),
-                'tipe'  => strtolower($row['tipe'] ?? 'benefit'),
+                'tipe' => strtolower($row['tipe'] ?? 'benefit'),
             ];
         }
 
-        $salesmen = $salesmanModel->orderBy('id', 'ASC')->findAll();
+        // Ambil penilaian aktif berdasarkan periode.
+        // Data soft delete tidak ikut kalau model PenilaianModel sudah useSoftDeletes = true.
         $penilaianRows = $penilaianModel
             ->where('periode', $periode)
             ->orderBy('salesman_id', 'ASC')
             ->orderBy('kriteria_id', 'ASC')
             ->findAll();
 
+        // Ambil hanya salesman yang benar-benar punya penilaian aktif di periode ini.
+        // Jadi salesman yang belum dinilai / sudah soft delete tidak dianggap belum lengkap.
+        $salesmanIds = [];
+
+        foreach ($penilaianRows as $row) {
+            if (!empty($row['salesman_id'])) {
+                $salesmanIds[] = $row['salesman_id'];
+            }
+        }
+
+        $salesmanIds = array_values(array_unique($salesmanIds));
+
+        if (empty($salesmanIds)) {
+            $salesmen = [];
+        } else {
+            $salesmen = $salesmanModel
+                ->whereIn('id', $salesmanIds)
+                ->orderBy('id', 'ASC')
+                ->findAll();
+        }
+
         $nilaiMap = [];
+
         foreach ($penilaianRows as $row) {
             $salesmanId = $row['salesman_id'] ?? null;
             $kriteriaId = $row['kriteria_id'] ?? null;
@@ -165,9 +204,9 @@ class Perhitungan extends BaseController
             }
 
             $alternative = [
-                'id'     => $salesman['id'],
-                'kode'   => $salesman['kode_alternatif'] ?? $salesman['kode'] ?? ('A' . $salesman['id']),
-                'nama'   => $salesman['nama'] ?? '',
+                'id' => $salesman['id'],
+                'kode' => $salesman['kode_alternatif'] ?? $salesman['kode'] ?? ('A' . $salesman['id']),
+                'nama' => $salesman['nama'] ?? '',
                 'scores' => $scores,
             ];
 
@@ -179,7 +218,10 @@ class Perhitungan extends BaseController
         }
 
         $calculation = $topsisService->calculate($criteria, $alternatives);
-        $canProcess = !empty($criteria) && count($alternatives) >= 2 && !empty($calculation['results']);
+
+        $canProcess = !empty($criteria)
+            && count($alternatives) >= 2
+            && !empty($calculation['results']);
 
         return [
             'criteria' => $criteria,
@@ -204,6 +246,7 @@ class Perhitungan extends BaseController
                     'tipe' => strtolower($row['tipe'] ?? 'benefit'),
                 ];
             }, $criteriaRaw),
+
             'salesmen' => array_map(static function ($row) {
                 return [
                     'id' => (int) ($row['id'] ?? 0),
@@ -211,6 +254,7 @@ class Perhitungan extends BaseController
                     'nama' => $row['nama'] ?? '',
                 ];
             }, $salesmen),
+
             'penilaian' => array_map(static function ($row) {
                 return [
                     'salesman_id' => (int) ($row['salesman_id'] ?? 0),
@@ -226,16 +270,18 @@ class Perhitungan extends BaseController
     {
         $hasilModel = new HasilPerhitunganModel();
 
-        $hasilModel->where('periode', $periode)->delete();
+        $hasilModel
+            ->where('periode', $periode)
+            ->delete();
 
         foreach ($results as $row) {
             $hasilModel->insert([
-                'periode'          => $periode,
-                'salesman_id'      => $row['id'],
+                'periode' => $periode,
+                'salesman_id' => $row['id'],
                 'nilai_preferensi' => $row['preferensi'],
-                'ranking'          => $row['ranking'],
-                'd_plus'           => $row['d_plus'],
-                'd_minus'          => $row['d_minus'],
+                'ranking' => $row['ranking'],
+                'd_plus' => $row['d_plus'],
+                'd_minus' => $row['d_minus'],
             ]);
         }
     }
@@ -243,7 +289,10 @@ class Perhitungan extends BaseController
     private function saveSnapshot(string $periode, array $payload, string $sourceHash): void
     {
         $snapshotModel = new PerhitunganSnapshotModel();
-        $existing = $snapshotModel->where('periode', $periode)->first();
+
+        $existing = $snapshotModel
+            ->where('periode', $periode)
+            ->first();
 
         $data = [
             'periode' => $periode,
@@ -263,7 +312,10 @@ class Perhitungan extends BaseController
     private function getSnapshotRow(string $periode): ?array
     {
         $snapshotModel = new PerhitunganSnapshotModel();
-        return $snapshotModel->where('periode', $periode)->first();
+
+        return $snapshotModel
+            ->where('periode', $periode)
+            ->first();
     }
 
     private function decodeSnapshot(?string $json): array
@@ -273,6 +325,7 @@ class Perhitungan extends BaseController
         }
 
         $data = json_decode($json, true);
+
         return is_array($data) ? $data : [];
     }
 

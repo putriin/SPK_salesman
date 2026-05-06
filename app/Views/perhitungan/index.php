@@ -93,14 +93,14 @@ $winnerPreference = isset($winnerData['preferensi']) ? (float) $winnerData['pref
                     <div class="col-md-8">
                         <div class="d-flex flex-wrap gap-2 justify-content-md-end">
                             <?php if ($selectedPeriodeValue !== '' && !empty($periodRows)): ?>
-                            <form method="post" action="<?= base_url('perhitungan/process') ?>"
-                                onsubmit="return confirm('Perhitungan TOPSIS untuk periode <?= esc($selectedPeriodeValue) ?> akan diproses ulang sesuai data penilaian terbaru. Lanjutkan?')">
+                            <form id="formProsesTopsis" method="post" action="<?= base_url('perhitungan/process') ?>">
                                 <?= csrf_field() ?>
 
                                 <input type="hidden" name="periode" value="<?= esc($selectedPeriodeValue) ?>">
 
-                                <button type="submit" class="btn btn-success"
-                                    <?= !$canProcessValue ? 'disabled' : '' ?>>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#modalProsesTopsis" <?= !$canProcessValue ? 'disabled' : '' ?>>
+
                                     <?= $hasSnapshotValue ? 'Proses Ulang / Update Hasil' : 'Proses TOPSIS' ?>
                                 </button>
                             </form>
@@ -488,5 +488,44 @@ $winnerPreference = isset($winnerData['preferensi']) ? (float) $winnerData['pref
         <?php endif; ?>
     </div>
 </section>
+
+<div class="modal fade" id="modalProsesTopsis" tabindex="-1" aria-labelledby="modalProsesTopsisLabel"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title text-danger fw-semibold" id="modalProsesTopsisLabel">
+                    Konfirmasi Proses
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                Perhitungan TOPSIS untuk periode
+                <strong><?= esc($selectedPeriodeValue) ?></strong>
+                akan diproses ulang sesuai data penilaian terbaru.
+                <br><br>
+                Apakah kamu yakin ingin melanjutkan?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="button" class="btn btn-danger"
+                    onclick="document.getElementById('formProsesTopsis').submit();">
+
+                    Proses
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <?= $this->endSection() ?>
