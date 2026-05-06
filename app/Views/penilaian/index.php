@@ -41,14 +41,18 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label for="periode" class="form-label">Periode</label>
-                    <input type="month" id="periode" name="periode" class="form-control" required>
+                    <input type="month" id="periode" name="periode" class="form-control"
+                        value="<?= esc($editPeriode ?? '') ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="salesman" class="form-label">Salesman</label>
                     <select id="salesman" name="salesman" class="form-select" required>
                         <option value="">Pilih salesman</option>
                         <?php foreach($salesmen as $s): ?>
-                        <option value="<?= esc($s['id']) ?>"><?= esc($s['nama']) ?></option>
+                        <option value="<?= esc($s['id']) ?>"
+                            <?= isset($editSalesmanId) && $editSalesmanId == $s['id'] ? 'selected' : '' ?>>
+                            <?= esc($s['nama']) ?>
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -81,8 +85,10 @@
                                 </td>
                                 <td class="text-center"><?= esc($k['jenis']) ?></td>
                                 <td class="text-center"><?= number_format($k['bobot'], 0) ?></td>
-                                <td><input type="number" name="nilai[]" class="form-control text-center" min="0"
-                                        max="100" required></td>
+                                <td>
+                                    <input type="number" name="nilai[]" class="form-control text-center" min="0"
+                                        value="<?= esc($editData[$k['id']] ?? '') ?>" required>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                             <?php else: ?>

@@ -14,6 +14,15 @@ $periode = isset($detailData['periode']) ? (string) $detailData['periode'] : '-'
 $salesman = isset($detailData['salesman']) ? (string) $detailData['salesman'] : '-';
 $salesmanId = isset($detailData['salesman_id']) ? (string) $detailData['salesman_id'] : '';
 $totalKriteria = count($nilaiRows);
+
+function formatAngka($angka)
+{
+    if ($angka === '-' || $angka === null || $angka === '') {
+        return '-';
+    }
+
+    return rtrim(rtrim(number_format((float) $angka, 2, '.', ''), '0'), '.');
+}
 ?>
 
 <section class="card border-0 shadow-sm">
@@ -68,7 +77,12 @@ $totalKriteria = count($nilaiRows);
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Status</div>
+
+                        <?php if ($totalKriteria > 0): ?>
                         <span class="badge bg-success">Lengkap</span>
+                        <?php else: ?>
+                        <span class="badge bg-secondary">Belum Ada Data</span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -100,16 +114,16 @@ $totalKriteria = count($nilaiRows);
                         <?php
                                 $namaKriteria = is_array($row) && isset($row['kriteria']) ? (string) $row['kriteria'] : '-';
                                 $jenis = is_array($row) && isset($row['jenis']) ? (string) $row['jenis'] : '-';
-                                $bobot = is_array($row) && isset($row['bobot']) ? (string) $row['bobot'] : '-';
-                                $score = is_array($row) && isset($row['score']) ? (string) $row['score'] : '-';
+                                $bobot = is_array($row) && isset($row['bobot']) ? $row['bobot'] : '-';
+                                $score = is_array($row) && isset($row['score']) ? $row['score'] : '-';
                                 ?>
 
                         <tr>
                             <td class="text-center"><?= esc((string) ($index + 1)) ?></td>
                             <td class="text-start ps-3 fw-medium"><?= esc($namaKriteria) ?></td>
                             <td class="text-center"><?= esc(ucfirst($jenis)) ?></td>
-                            <td class="text-center"><?= esc($bobot) ?></td>
-                            <td class="text-center"><?= esc($score) ?></td>
+                            <td class="text-center"><?= esc(formatAngka($bobot)) ?></td>
+                            <td class="text-center"><?= esc(formatAngka($score)) ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php else: ?>
