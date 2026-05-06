@@ -2,6 +2,7 @@
 
 <?= $this->section('page_css') ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/pages/admin-users.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
@@ -97,7 +98,14 @@ function roleLabel($role)
 
                     <div class="col-md-2">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" required>
+
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="passwordInput" class="form-control">
+
+                            <button type="button" id="togglePassword" class="toggle-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="col-md-1">
@@ -267,5 +275,26 @@ function roleLabel($role)
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('passwordInput');
+    const togglePassword = document.getElementById('togglePassword');
+
+    if (passwordInput && togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const icon = togglePassword.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    }
+});
+</script>
 
 <?= $this->endSection() ?>

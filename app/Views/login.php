@@ -7,7 +7,39 @@
     <title><?= esc($title ?? 'Login') ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= base_url('assets/css/pages/login.css') ?>">
+
+    <style>
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-wrapper input {
+        padding-right: 42px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        color: #6c757d;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        z-index: 5;
+    }
+
+    .toggle-password:hover {
+        color: #0d6efd;
+    }
+    </style>
 </head>
 
 <body>
@@ -43,8 +75,15 @@
 
                                 <div class="mb-4">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" id="password" name="password" class="form-control"
-                                        placeholder="Masukkan password" required>
+
+                                    <div class="password-wrapper">
+                                        <input type="password" id="password" name="password" class="form-control"
+                                            placeholder="Masukkan password" required>
+
+                                        <button type="button" id="togglePassword" class="toggle-password">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="d-grid mb-3">
@@ -82,12 +121,33 @@
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
     function handleGoogleSignIn(response) {
         document.getElementById('googleCredential').value = response.credential;
         document.getElementById('googleLoginForm').submit();
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        if (passwordInput && togglePassword) {
+            togglePassword.addEventListener('click', function() {
+                const icon = togglePassword.querySelector('i');
+
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.className = 'bi bi-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.className = 'bi bi-eye';
+                }
+            });
+        }
+    });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
