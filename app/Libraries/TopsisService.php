@@ -35,116 +35,216 @@ class TopsisService
             return $this->emptyResult($criteria, $alternatives);
         }
 
-        // 1. Ambil bobot awal dari data kriteria
-        $rawWeights = [];
+       // ======================================================
+// STEP 2
+// NORMALISASI BOBOT KRITERIA
+// (Mengikuti Excel)
+// ======================================================
 
-        foreach ($criteria as $criterion) {
-            $rawWeights[] = (float) ($criterion['bobot'] ?? 0);
+
+$weights = [];
+
+foreach ($criteria as $criterion) {
+
+    $weights[] = ((float)$criterion['bobot']) / 100;
+
+}
+
+
+
+// ======================================================
+// STEP 3
+// PENYEBUT NORMALISASI
+// Rumus Excel : SQRT(SUMSQ())
+// ======================================================
+
+$divisors = [];
+
+for ($col = 0; $col < $criteriaCount; $col++) {
+
+    $sumSquare = 0;
+
+    foreach ($alternatives as $alternative) {
+
+        $nilai = (float)$alternative['scores'][$col];
+
+        $sumSquare += pow($nilai,2);
+
+    }
+
+    $divisors[$col] = sqrt($sumSquare);
+
+}
+
+
+
+// ======================================================
+// STEP 4
+// MATRIKS KEPUTUSAN TERNORMALISASI
+// Rumus Excel : IFERROR(nilai/pembagi,0)
+// ======================================================
+
+$normalized = [];
+
+foreach($alternatives as $row=>$alternative){
+
+    foreach($alternative['scores'] as $col=>$nilai){
+
+        if($divisors[$col]==0){
+
+            $normalized[$row][$col]=0;
+
+        }else{
+
+            $normalized[$row][$col]=$nilai/$divisors[$col];
+
         }
 
-        // 2. Normalisasi bobot
-        $totalWeight = array_sum($rawWeights);
-        $weights = [];
+    }
 
-        foreach ($rawWeights as $weight) {
-            $weights[] = $totalWeight > 0 ? $weight / $totalWeight : 0;
-        }
+}
+       // ======================================================
+// STEP 5
+// MATRIKS TERNORMALISASI BERBOBOT
+// Rumus Excel : yij = rij × wj
+// ======================================================
 
-        // 3. Hitung divisor / pembagi normalisasi matriks keputusan
-        $divisors = [];
+$weighted = [];
 
-        for ($i = 0; $i < $criteriaCount; $i++) {
-            $sumSquares = 0.0;
+foreach ($normalized as $rowIndex => $row) {
 
-            foreach ($alternatives as $alt) {
-                $sumSquares += pow((float) ($alt['scores'][$i] ?? 0), 2);
-            }
+    foreach ($row as $colIndex => $value) {
 
-            $divisors[$i] = $sumSquares > 0 ? sqrt($sumSquares) : 1;
-        }
+        $weighted[$rowIndex][$colIndex] =
+            (float)$value *
+            (float)$weights[$colIndex];
 
-        // 4. Matriks ternormalisasi
-        $normalized = [];
+    }
 
-        foreach ($alternatives as $rowIndex => $alt) {
-            for ($colIndex = 0; $colIndex < $criteriaCount; $colIndex++) {
-                $score = (float) ($alt['scores'][$colIndex] ?? 0);
-                $normalized[$rowIndex][$colIndex] = $divisors[$colIndex] != 0
-                    ? $score / $divisors[$colIndex]
-                    : 0;
-            }
-        }
+}
 
-        // 5. Matriks ternormalisasi berbobot
-        $weighted = [];
+       // ======================================================
+// STEP 6
+// SOLUSI IDEAL POSITIF (A+) DAN NEGATIF (A-)
+// ======================================================
 
-        foreach ($normalized as $rowIndex => $row) {
-            for ($colIndex = 0; $colIndex < $criteriaCount; $colIndex++) {
-                $weighted[$rowIndex][$colIndex] = ($row[$colIndex] ?? 0) * ($weights[$colIndex] ?? 0);
-            }
-        }
+$idealPositive = [];
+$idealNegative = [];
 
-        // 6. Solusi ideal positif dan negatif
-        $idealPositive = [];
-        $idealNegative = [];
+for ($col = 0; $col < $criteriaCount; $col++) {
 
-        for ($i = 0; $i < $criteriaCount; $i++) {
-            $columnValues = array_column($weighted, $i);
+    // Ambil semua nilai pada kolom ke-$col
+    $column = array_column($weighted, $col);
 
-            if (empty($columnValues)) {
-                $columnValues = [0];
-            }
+    // Jika kosong, isi dengan 0
+    if (empty($column)) {
+        $column = [0];
+    }
 
-            $type = strtolower($criteria[$i]['tipe'] ?? 'benefit');
+    // Jenis kriteria
+    $type = strtolower($criteria[$col]['tipe'] ?? 'benefit');
 
-            if ($type === 'cost') {
-                $idealPositive[$i] = min($columnValues);
-                $idealNegative[$i] = max($columnValues);
-            } else {
-                $idealPositive[$i] = max($columnValues);
-                $idealNegative[$i] = min($columnValues);
-            }
-        }
+    if ($type === 'benefit') {
 
-        // 7. Hitung D+, D-, dan nilai preferensi
-        $results = [];
+        // Benefit
+        $idealPositive[$col] = max($column);
+        $idealNegative[$col] = min($column);
 
-        foreach ($alternatives as $rowIndex => $alt) {
-            $dPlus = 0.0;
-            $dMinus = 0.0;
+    } else {
 
-            for ($colIndex = 0; $colIndex < $criteriaCount; $colIndex++) {
-                $value = $weighted[$rowIndex][$colIndex] ?? 0;
+        // Cost
+        $idealPositive[$col] = min($column);
+        $idealNegative[$col] = max($column);
 
-                $dPlus += pow($value - $idealPositive[$colIndex], 2);
-                $dMinus += pow($value - $idealNegative[$colIndex], 2);
-            }
+    }
 
-            $dPlus = sqrt($dPlus);
-            $dMinus = sqrt($dMinus);
+}
 
-            $preference = ($dPlus + $dMinus) > 0
-                ? $dMinus / ($dPlus + $dMinus)
-                : 0;
+       // ======================================================
+// STEP 7
+// MENGHITUNG JARAK KE SOLUSI IDEAL
+// D+ DAN D-
+// Rumus :
+// D+ = √Σ(yij - A+)²
+// D- = √Σ(yij - A-)²
+// ======================================================
 
-            $results[] = [
-                'id' => $alt['id'],
-                'kode' => $alt['kode'],
-                'nama' => $alt['nama'],
-                'd_plus' => $dPlus,
-                'd_minus' => $dMinus,
-                'preferensi' => $preference,
-            ];
-        }
+$results = [];
 
-        // 8. Ranking berdasarkan nilai preferensi terbesar
-        usort($results, function ($a, $b) {
-            return $b['preferensi'] <=> $a['preferensi'];
-        });
+foreach ($alternatives as $rowIndex => $alternative) {
 
-        foreach ($results as $index => &$result) {
-            $result['ranking'] = $index + 1;
-        }
+    $dPlus = 0;
+    $dMinus = 0;
+
+    foreach ($weighted[$rowIndex] as $colIndex => $value) {
+
+        $dPlus += pow(
+            $value - $idealPositive[$colIndex],
+            2
+        );
+
+        $dMinus += pow(
+            $value - $idealNegative[$colIndex],
+            2
+        );
+
+    }
+
+    $dPlus = sqrt($dPlus);
+    $dMinus = sqrt($dMinus);
+
+    // ==================================================
+    // STEP 8
+    // NILAI PREFERENSI
+    // Vi = D- / (D+ + D-)
+    // ==================================================
+
+    if (($dPlus + $dMinus) == 0) {
+
+        $preference = 0;
+
+    } else {
+
+        $preference = $dMinus / ($dPlus + $dMinus);
+
+    }
+
+    $results[] = [
+
+        'id' => $alternative['id'],
+
+        'kode' => $alternative['kode'],
+
+        'nama' => $alternative['nama'],
+
+        'd_plus' => $dPlus,
+
+        'd_minus' => $dMinus,
+
+        'preferensi' => $preference,
+
+    ];
+
+}
+      // ======================================================
+// STEP 9
+// RANKING
+// Mengurutkan nilai preferensi terbesar
+// ======================================================
+
+usort($results, function ($a, $b) {
+
+    return $b['preferensi'] <=> $a['preferensi'];
+
+});
+
+foreach ($results as $index => &$row) {
+
+    $row['ranking'] = $index + 1;
+
+}
+
+unset($row);
 
         unset($result);
 

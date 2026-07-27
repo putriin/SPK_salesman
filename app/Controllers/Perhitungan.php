@@ -122,16 +122,8 @@ class Perhitungan extends BaseController
         $penilaianModel = new PenilaianModel();
         $topsisService = new TopsisService();
 
-        $criteriaRaw = $kriteriaModel
-    ->orderBy("
-        CASE
-            WHEN nama_kriteria = 'Kedisiplinan' THEN 1
-            WHEN nama_kriteria = 'Close Order' THEN 2
-            WHEN nama_kriteria = 'Tanggung Jawab' THEN 3
-            WHEN nama_kriteria = 'Product Knowledge' THEN 4
-            ELSE 99
-        END
-    ", '', false)
+       $criteriaRaw = $kriteriaModel
+    ->orderBy('kode_kriteria', 'ASC')
     ->findAll();
 
         $criteria = [];
@@ -195,29 +187,39 @@ class Perhitungan extends BaseController
             $isComplete = true;
 
             foreach ($criteria as $criterion) {
-                if (isset($nilaiMap[$salesman['id']][$criterion['id']])) {
-                    $scores[] = (float) $nilaiMap[$salesman['id']][$criterion['id']];
-                } else {
-                    $isComplete = false;
-                    break;
-                }
+                $nilai = $nilaiMap[$salesman['id']][$criterion['id']] ?? null;
+
+    if ($nilai === null) {
+
+        $isComplete = false;
+
+        break;
+
+    }
+
+    $scores[] = (float) $nilai;
+
             }
 
-            $alternative = [
-                'id' => $salesman['id'],
-                'kode' => $salesman['kode_alternatif'] ?? $salesman['kode'] ?? ('A' . $salesman['id']),
-                'nama' => $salesman['nama'] ?? '',
-                'scores' => $scores,
-            ];
+        $alternative = [
+    'id'      => $salesman['id'],
+    'kode'    => $salesman['kode_alternatif'] ?? $salesman['kode'] ?? ('A' . $salesman['id']),
+    'nama'    => $salesman['nama'] ?? '',
+    'periode' => $periode,
+    'scores'  => $scores,
+];
 
-            if ($isComplete && !empty($criteria)) {
-                $alternatives[] = $alternative;
-            } else {
-                $incompleteAlternatives[] = $alternative;
-            }
-        }
+if ($isComplete && !empty($criteria)) {
+    $alternatives[] = $alternative;
+} else {
+    $incompleteAlternatives[] = $alternative;
+}
+}
 
-        $calculation = $topsisService->calculate($criteria, $alternatives);
+$calculation = $topsisService->calculate(
+    $criteria,
+    $alternatives
+);
 
         $canProcess = !empty($criteria)
             && count($alternatives) >= 2

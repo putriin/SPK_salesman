@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\HasilPerhitunganModel;
 use App\Models\SalesmanModel;
+use App\Models\PenilaianModel;
+use App\Models\KriteriaModel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -13,6 +15,8 @@ class Cetak extends BaseController
     {
         $hasilModel = new HasilPerhitunganModel();
         $salesmanModel = new SalesmanModel();
+        $penilaianModel = new PenilaianModel();
+        $kriteriaModel  = new KriteriaModel();
 
         $periodeList = $hasilModel
             ->select('periode')
@@ -56,13 +60,100 @@ class Cetak extends BaseController
             ];
         }
 
-        return [
-            'periode' => $periode,
-            'periodeOptions' => $periodeOptions,
-            'results' => $results,
-            'winner' => $results[0] ?? null,
-            'title' => 'Cetak Hasil TOPSIS',
-        ];
+        /*
+|--------------------------------------------------------------------------
+| Data Salesman Terbaik
+|--------------------------------------------------------------------------
+*/
+
+$winner = $results[0] ?? null;
+
+$winnerScores = [
+    'close_order' => 0,
+    'kunjungan'   => 0,
+    'demo'        => 0,
+];
+
+if ($winner) {
+
+    $criteria = $kriteriaModel
+        ->orderBy('kode_kriteria', 'ASC')
+        ->findAll();
+
+
+  $winnerSalesmanId = $rows[0]['salesman_id'] ?? null;
+
+$nilaiMap = [];
+
+if ($winnerSalesmanId) {
+
+    $penilaianRows = $penilaianModel
+        ->where('periode', $periode)
+        ->where('salesman_id', $winnerSalesmanId)
+        ->orderBy('kriteria_id', 'ASC')
+        ->findAll();
+
+    foreach ($penilaianRows as $row) {
+
+        $nilaiMap[$row['kriteria_id']] = $row['nilai'];
+
+    }
+
+}
+
+   $winnerScores = [
+    'close_order' => 0,
+    'kunjungan'   => 0,
+    'demo'        => 0,
+];
+
+foreach ($criteria as $item) {
+
+    switch ($item['kode_kriteria']) {
+
+        case 'C1':
+            $winnerScores['close_order'] =
+                $nilaiMap[$item['id']] ?? 0;
+            break;
+
+        case 'C2':
+            $winnerScores['kunjungan'] =
+                $nilaiMap[$item['id']] ?? 0;
+            break;
+
+        case 'C3':
+            $winnerScores['demo'] =
+                $nilaiMap[$item['id']] ?? 0;
+            break;
+    }
+}
+
+}
+$periodeLabel = date(
+    'F Y',
+    strtotime($periode . '-01')
+);
+       return [
+    'periode' => $periode,
+
+    'periodeLabel' => $periodeLabel,
+
+    'periodeOptions' => $periodeOptions,
+
+    'results' => $results,
+
+    'winner' => $winner,
+
+    'winnerScores' => $winnerScores,
+
+    'printedAt' => date('d-m-Y H:i:s'),
+
+    'printedBy' => session()->get('nama')
+        ?? session()->get('username')
+        ?? 'Manajer',
+
+    'title' => 'Laporan Hasil Perankingan Salesman',
+];
     }
 
     public function index()

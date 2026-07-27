@@ -61,8 +61,54 @@
             <!-- Input Nilai Kriteria -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-1 fw-semibold">Input Nilai Kriteria</h5>
-                    <p class="mb-0 text-muted small">Isi nilai kinerja salesman untuk setiap kriteria.</p>
+
+                    <h5 class="mb-1 fw-semibold">
+                        Input Nilai Kriteria
+                    </h5>
+
+                    <p class="mb-3 text-muted small">
+                        Masukkan nilai kinerja salesman berdasarkan data aktual pada periode yang dipilih.
+                    </p>
+
+                    <div class="alert alert-info border mb-0">
+
+                        <div class="d-flex">
+
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+                            </div>
+
+                            <div>
+
+                                <h6 class="fw-bold mb-2">
+                                    Petunjuk Pengisian
+                                </h6>
+
+                                <ul class="mb-0">
+
+                                    <li>
+                                        <strong>Close Order</strong> → jumlah transaksi yang berhasil ditutup.
+                                        <strong>Contoh : 18</strong>
+                                    </li>
+
+                                    <li>
+                                        <strong>Pencapaian Kunjungan</strong> → jumlah kunjungan ke pelanggan.
+                                        <strong>Contoh : 115</strong>
+                                    </li>
+
+                                    <li>
+                                        <strong>Jumlah Demo</strong> → jumlah demo produk yang dilakukan.
+                                        <strong>Contoh : 6</strong>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle mb-0">
@@ -83,11 +129,57 @@
                                 <td class="text-start ps-3 fw-medium"><?= esc($k['nama']) ?>
                                     <input type="hidden" name="kriteria_id[]" value="<?= esc($k['id']) ?>">
                                 </td>
-                                <td class="text-center"><?= esc($k['jenis']) ?></td>
-                                <td class="text-center"><?= number_format($k['bobot'], 0) ?></td>
+                                <td class="text-center">
+
+                                    <span class="badge bg-success">
+
+                                        <?= ucfirst(esc($k['jenis'])) ?>
+
+                                    </span>
+
+                                </td>
+                                <td class="text-center fw-semibold">
+
+                                    <?= number_format($k['bobot'],2) ?> %
+
+                                </td>
                                 <td>
+                                    <?php
+
+$placeholder = '';
+
+$helper = '';
+
+switch(strtolower($k['nama'])){
+
+    case 'close order':
+        $placeholder = 'Contoh : 18';
+        $helper = 'Jumlah transaksi berhasil';
+        break;
+
+    case 'pencapaian kunjungan':
+        $placeholder = 'Contoh : 115';
+        $helper = 'Jumlah kunjungan';
+        break;
+
+    case 'jumlah demo':
+        $placeholder = 'Contoh : 6';
+        $helper = 'Jumlah demo';
+        break;
+
+}
+
+?>
+
                                     <input type="number" name="nilai[]" class="form-control text-center" min="0"
-                                        value="<?= esc($editData[$k['id']] ?? '') ?>" required>
+                                        placeholder="<?= $placeholder ?>" value="<?= esc($editData[$k['id']] ?? '') ?>"
+                                        required>
+
+                                    <small class="text-muted">
+
+                                        <?= $helper ?>
+
+                                    </small>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

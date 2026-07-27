@@ -65,8 +65,7 @@ $kriteriaRows = is_array($rows ?? null) ? $rows : [];
                         <th style="width: 70px;">No</th>
                         <th>Nama Kriteria</th>
                         <th style="width: 180px;">Tipe</th>
-                        <th style="width: 160px;">Bobot Kepentingan</th>
-                        <th style="width: 190px;">Bobot Normalisasi</th>
+                        <th style="width: 160px;">Bobot</th>
                         <th style="width: 200px;">Aksi</th>
                     </tr>
                 </thead>
@@ -79,7 +78,6 @@ $kriteriaRows = is_array($rows ?? null) ? $rows : [];
                         $namaKriteria = $row['nama_kriteria'] ?? '-';
                         $tipe = $row['tipe'] ?? '-';
                         $bobot = $row['bobot'] ?? '-';
-                        $bobotNormalisasi = $row['bobot_normalisasi'] ?? '-';
                     ?>
 
                     <tr>
@@ -87,7 +85,6 @@ $kriteriaRows = is_array($rows ?? null) ? $rows : [];
                         <td class="text-center fw-medium"><?= esc($namaKriteria) ?></td>
                         <td class="text-center"><?= esc(ucfirst($tipe)) ?></td>
                         <td class="text-center"><?= esc($bobot) ?></td>
-                        <td class="text-center"><?= esc($bobotNormalisasi) ?></td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2">
                                 <button class="btn btn-warning btn-sm text-white px-3" type="button" data-action="edit"

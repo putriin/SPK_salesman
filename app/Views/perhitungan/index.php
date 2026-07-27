@@ -34,6 +34,23 @@ $isStaleValue = !empty($isStale);
 $winnerData = isset($winner) && is_array($winner) ? $winner : [];
 $winnerName = isset($winnerData['nama']) ? (string) $winnerData['nama'] : '-';
 $winnerPreference = isset($winnerData['preferensi']) ? (float) $winnerData['preferensi'] : 0;
+$winnerScores = [];
+
+foreach ($alternativesRows as $alt) {
+
+    if (($alt['id'] ?? null) == ($winnerData['id'] ?? null)) {
+
+        $winnerScores = $alt['scores'] ?? [];
+
+        break;
+
+    }
+
+}
+
+$winnerCloseOrder = $winnerScores[0] ?? 0;
+$winnerKunjungan  = $winnerScores[1] ?? 0;
+$winnerDemo       = $winnerScores[2] ?? 0;
 ?>
 
 <section class="card border-0 shadow-sm">
@@ -184,17 +201,99 @@ $winnerPreference = isset($winnerData['preferensi']) ? (float) $winnerData['pref
         </div>
 
         <?php if (!empty($winnerData)): ?>
-        <div class="alert alert-success mb-4">
-            <h5 class="fw-semibold mb-2">Hasil Utama</h5>
-            <p class="mb-0">
-                Salesman terbaik periode <strong><?= esc($selectedPeriodeValue) ?></strong> adalah
-                <strong><?= esc($winnerName) ?></strong>
-                dengan nilai preferensi
-                <strong><?= number_format($winnerPreference, 4) ?></strong>.
-            </p>
-        </div>
-        <?php endif; ?>
 
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-success text-white">
+
+                <h5 class="mb-0 fw-bold">
+
+                    🏆 Salesman Terbaik Periode <?= esc($selectedPeriodeValue) ?>
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <h3 class="fw-bold text-success">
+
+                            <?= esc($winnerName) ?>
+
+                        </h3>
+
+                        <div class="text-muted">
+
+                            Ranking #1
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-8">
+
+                        <table class="table table-borderless mb-0">
+
+                            <tr>
+
+                                <th width="220">⭐ Nilai Preferensi</th>
+
+                                <td><?= number_format($winnerPreference,4) ?></td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>📦 Close Order</th>
+
+                                <td><?= $winnerCloseOrder ?> Unit</td>
+
+                            </tr>
+
+                            <tr>
+                                <th>📍 Pencapaian Kunjungan</th>
+                                <td><?= $winnerKunjungan ?></td>
+                            </tr>
+
+                            <tr>
+
+                                <th>🎤 Jumlah Demo</th>
+
+                                <td><?= $winnerDemo ?> Kali</td>
+
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <p class="mb-0 text-muted">
+
+                    Berdasarkan hasil perhitungan menggunakan metode
+                    <strong>Technique for Order Preference by Similarity to Ideal Solution (TOPSIS)</strong>,
+                    salesman dengan nilai preferensi tertinggi pada periode
+                    <strong><?= esc($selectedPeriodeValue) ?></strong>
+                    adalah
+                    <strong><?= esc($winnerName) ?></strong>
+                    sehingga ditetapkan sebagai
+                    <strong>Salesman Terbaik</strong>
+                    pada periode tersebut.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <?php endif; ?>
         <?php if (!empty($incompleteRows)): ?>
         <div class="alert alert-warning mb-4">
             <h5 class="fw-semibold mb-2">Perhatian</h5>

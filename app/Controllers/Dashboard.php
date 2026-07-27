@@ -24,20 +24,36 @@ class Dashboard extends BaseController
             ]);
         }
 
-        $salesmanModel = new SalesmanModel();
-        $kriteriaModel = new KriteriaModel();
+        $salesmanModel  = new SalesmanModel();
+        $kriteriaModel  = new KriteriaModel();
         $penilaianModel = new PenilaianModel();
-        $hasilModel = new HasilPerhitunganModel();
-        $userModel = new UserModel();
+        $hasilModel     = new HasilPerhitunganModel();
+        $userModel      = new UserModel();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Statistik Dashboard
+        |--------------------------------------------------------------------------
+        */
 
         $totalSalesman = $salesmanModel->countAllResults();
+
         $totalKriteria = $kriteriaModel->countAllResults();
+
         $totalNilai = $penilaianModel
             ->select('salesman_id, periode')
             ->distinct()
             ->countAllResults();
+
         $totalHasilAkhir = $hasilModel->countAllResults();
+
         $totalUser = $userModel->countAllResults();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Daftar Periode
+        |--------------------------------------------------------------------------
+        */
 
         $periodeRows = $hasilModel
             ->select('periode')
@@ -45,9 +61,10 @@ class Dashboard extends BaseController
             ->orderBy('periode', 'DESC')
             ->findAll();
 
-        $periodeOptions = array_map(static function ($row) {
-            return $row['periode'];
-        }, $periodeRows);
+        $periodeOptions = array_map(
+            static fn($row) => $row['periode'],
+            $periodeRows
+        );
 
         $selectedPeriode = $this->request->getGet('periode');
 
@@ -55,26 +72,40 @@ class Dashboard extends BaseController
             $selectedPeriode = $periodeOptions[0];
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Data Grafik
+        |--------------------------------------------------------------------------
+        */
+
         $chartLabels = [];
         $chartValues = [];
+
         $chartTitle = 'Grafik Kinerja Salesman Terbaik';
 
-        $topCriteriaInsight = [
-            'nama_kriteria' => '-',
-            'nilai_tertinggi' => '-',
-            'salesman' => '-',
-        ];
+        /*
+        |--------------------------------------------------------------------------
+        | Panel Salesman Terbaik
+        |--------------------------------------------------------------------------
+        */
+
+        $topSalesman = null;
+
+        $topSalesmanPerformance = [];
 
         if (!empty($selectedPeriode)) {
+
             $hasilRows = $hasilModel
                 ->where('periode', $selectedPeriode)
                 ->orderBy('ranking', 'ASC')
                 ->findAll();
 
             $salesmanIds = array_column($hasilRows, 'salesman_id');
+
             $salesmanMap = [];
 
             if (!empty($salesmanIds)) {
+
                 $salesmanRows = $salesmanModel
                     ->whereIn('id', $salesmanIds)
                     ->findAll();
@@ -83,50 +114,133 @@ class Dashboard extends BaseController
                     $salesmanMap[$row['id']] = $row;
                 }
             }
+                        /*
+            |--------------------------------------------------------------------------
+            | Data Grafik
+            |--------------------------------------------------------------------------
+            */
 
             foreach ($hasilRows as $row) {
-                $chartLabels[] = $salesmanMap[$row['salesman_id']]['nama'] ?? 'Unknown';
-                $chartValues[] = (float) ($row['nilai_preferensi'] ?? 0);
+
+                $chartLabels[] =
+                    $salesmanMap[$row['salesman_id']]['nama'] ?? 'Unknown';
+
+                $chartValues[] =
+                    (float) ($row['nilai_preferensi'] ?? 0);
             }
 
             $chartTitle .= ' (Periode ' . $selectedPeriode . ')';
 
-            $topPenilaian = $penilaianModel
-                ->select('penilaian.nilai, penilaian.salesman_id, penilaian.kriteria_id')
+            /*
+            |--------------------------------------------------------------------------
+            | Salesman Ranking #1
+            |--------------------------------------------------------------------------
+            */
+
+            $topSalesman = $hasilModel
                 ->where('periode', $selectedPeriode)
-                ->orderBy('nilai', 'DESC')
+                ->orderBy('ranking', 'ASC')
                 ->first();
 
-            if (!empty($topPenilaian)) {
-                $salesman = $salesmanModel->find($topPenilaian['salesman_id']);
-                $kriteria = $kriteriaModel->find($topPenilaian['kriteria_id']);
+            if ($topSalesman) {
 
-                $topCriteriaInsight = [
-                    'nama_kriteria' => $kriteria['nama_kriteria'] ?? '-',
-                    'nilai_tertinggi' => $topPenilaian['nilai'] ?? '-',
-                    'salesman' => $salesman['nama'] ?? '-',
-                ];
-            }
-        }
+                $topSalesman['nama'] =
+                    $salesmanMap[$topSalesman['salesman_id']]['nama']
+                    ?? '-';
+
+                /*
+                |--------------------------------------------------------------------------
+                | Mengambil seluruh nilai kriteria salesman terbaik
+                |--------------------------------------------------------------------------
+                */
+
+                   $nilaiRows = $penilaianModel
+                    ->select('
+                     penilaian.nilai,
+                        kriteria.kode_kriteria,
+                        kriteria.nama_kriteria
+                    ')
+                    ->join(
+                        'kriteria',
+                        'kriteria.id = penilaian.kriteria_id'
+                    )
+                    ->where(
+                        'penilaian.periode',
+                        $selectedPeriode
+                    )
+                    ->where(
+                        'penilaian.salesman_id',
+                        $topSalesman['salesman_id']
+                    )
+                    ->orderBy(
+                        'kriteria.kode_kriteria',
+                        'ASC'
+                    )
+                    ->findAll();
+
+               foreach ($nilaiRows as $row) {
+
+    switch ($row['kode_kriteria']) {
+
+        case 'C1':
+            $topSalesman['close_order'] = $row['nilai'];
+            break;
+
+        case 'C2':
+            $topSalesman['kunjungan'] = $row['nilai'];
+            break;
+
+        case 'C3':
+            $topSalesman['demo'] = $row['nilai'];
+            break;
+
+    }
+    }}
+    
+
+}
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kirim Data ke View
+        |--------------------------------------------------------------------------
+        */
 
         return view('dashboard/index', [
+
             'title' => 'Dashboard',
-            'username' => session()->get('username') ?? 'User',
+
+            'username' =>
+                session()->get('username') ?? 'User',
+
             'stats' => [
-                'salesman' => $totalSalesman,
-                'kriteria' => $totalKriteria,
-                'nilai' => $totalNilai,
+                'salesman'   => $totalSalesman,
+                'kriteria'   => $totalKriteria,
+                'nilai'      => $totalNilai,
                 'hasilAkhir' => $totalHasilAkhir,
-                'user' => $totalUser,
+                'user'       => $totalUser,
             ],
+
             'chart' => [
                 'labels' => $chartLabels,
                 'values' => $chartValues,
-                'title' => $chartTitle,
+                'title'  => $chartTitle,
             ],
+
             'periodeOptions' => $periodeOptions,
+
             'selectedPeriode' => $selectedPeriode,
-            'topCriteriaInsight' => $topCriteriaInsight,
+
+            'topSalesman' => $topSalesman,
+
+            'topSalesmanPerformance' => $topSalesmanPerformance,
+                        /*
+            |--------------------------------------------------------------------------
+            | Tidak ada lagi dashboardInsight
+            | Tidak ada lagi topCriteriaInsight
+            |--------------------------------------------------------------------------
+            */
+
         ]);
     }
 }

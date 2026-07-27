@@ -50,20 +50,147 @@
     <div class="card-body">
 
         <!-- HEADER -->
+        <!-- HEADER -->
         <div class="text-center mb-4">
-            <h4 class="fw-bold mb-1">LAPORAN HASIL PERHITUNGAN TOPSIS</h4>
-            <div class="text-muted">Sistem Pendukung Keputusan Pemilihan Salesman Terbaik</div>
-            <div class="mt-2"><strong>Periode:</strong> <?= esc($periode) ?></div>
+
+            <h3 class="fw-bold text-uppercase mb-1">
+                LAPORAN HASIL PERANKINGAN SALESMAN
+            </h3>
+
+            <div class="text-muted fs-5">
+                Sistem Pendukung Keputusan Pemilihan Salesman Terbaik
+            </div>
+
+            <hr class="my-3">
+
+            <div class="row text-start">
+
+                <div class="col-md-6">
+
+                    <table class="table table-borderless table-sm mb-0">
+
+                        <tr>
+                            <th width="170">Periode Penilaian</th>
+                            <td>: <?= esc($periodeLabel) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Jumlah Salesman Dinilai</th>
+                            <td>: <?= count($results) ?> Orang</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <table class="table table-borderless table-sm mb-0">
+
+                        <tr>
+                            <th width="170">Tanggal Cetak</th>
+                            <td>: <?= esc($printedAt) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Dicetak Oleh</th>
+                            <td>: <?= esc($printedBy) ?></td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
         </div>
 
         <!-- WINNER -->
         <?php if (!empty($winner)): ?>
-        <div class="alert alert-success">
-            <strong>Salesman Terbaik:</strong>
-            <?= esc($winner['nama']) ?> (<?= esc($winner['kode']) ?>)
-            dengan nilai preferensi
-            <strong><?= number_format($winner['preferensi'], 4) ?></strong>.
+
+        <div class="card border-success shadow-sm mb-4">
+
+            <div class="card-header bg-success text-white fw-bold">
+
+                🏆 Ringkasan Salesman Terbaik
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <h3 class="fw-bold text-success mb-1">
+                            <?= esc($winner['nama']) ?>
+                        </h3>
+
+                        <div class="text-muted">
+                            Ranking #<?= esc($winner['ranking']) ?>
+                        </div>
+
+                        <div class="mt-3">
+
+                            <span class="badge bg-success">
+                                Salesman Terbaik
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-8">
+
+                        <table class="table table-borderless table-sm mb-0">
+
+                            <tr>
+                                <th width="220">⭐ Nilai Preferensi</th>
+                                <td><?= number_format($winner['preferensi'],4) ?></td>
+                            </tr>
+
+                            <tr>
+                                <th>📦 Close Order</th>
+                                <td><?= (int) $winnerScores['close_order'] ?> Unit</td>
+                            </tr>
+
+                            <tr>
+                                <th>📍 Pencapaian Kunjungan</th>
+                                <td><?= (int) $winnerScores['kunjungan'] ?></td>
+                            </tr>
+
+                            <tr>
+                                <th>🎤 Jumlah Demo</th>
+                                <td><?= (int) $winnerScores['demo'] ?> Kali</td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <p class="mb-0 text-justify">
+
+                    Berdasarkan hasil perhitungan menggunakan metode
+                    <strong>Technique for Order Preference by Similarity to Ideal Solution (TOPSIS)</strong>,
+                    diperoleh bahwa
+                    <strong><?= esc($winner['nama']) ?></strong>
+                    memperoleh nilai preferensi tertinggi sebesar
+                    <strong><?= number_format($winner['preferensi'],4) ?></strong>,
+                    sehingga ditetapkan sebagai
+                    <strong>Salesman Terbaik</strong>
+                    pada periode
+                    <strong><?= esc($periodeLabel) ?></strong>.
+
+                </p>
+
+            </div>
+
         </div>
+
         <?php endif; ?>
 
         <!-- TABLE -->
@@ -71,31 +198,57 @@
             <table class="table table-bordered table-striped table-hover align-middle mb-0">
                 <thead class="table-primary text-center">
                     <tr>
-                        <th style="width:100px;">Ranking</th>
-                        <th style="width:120px;">Kode</th>
+                        <th width="90">Ranking</th>
+                        <th width="100">Kode</th>
                         <th>Nama Salesman</th>
-                        <th style="width:140px;">D+</th>
-                        <th style="width:140px;">D-</th>
-                        <th style="width:180px;">Nilai Preferensi</th>
+                        <th width="180">Nilai Preferensi</th>
+                        <th width="180">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($results)): ?>
                     <?php foreach ($results as $row): ?>
                     <tr>
+
                         <td class="text-center">
-                            <span class="badge bg-primary">#<?= esc($row['ranking']) ?></span>
+                            <span class="badge bg-primary">
+                                #<?= esc($row['ranking']) ?>
+                            </span>
                         </td>
-                        <td class="text-center"><?= esc($row['kode']) ?></td>
-                        <td><?= esc($row['nama']) ?></td>
-                        <td class="text-center"><?= number_format($row['d_plus'], 4) ?></td>
-                        <td class="text-center"><?= number_format($row['d_minus'], 4) ?></td>
-                        <td class="text-center fw-bold"><?= number_format($row['preferensi'], 4) ?></td>
+
+                        <td class="text-center">
+                            <?= esc($row['kode']) ?>
+                        </td>
+
+                        <td>
+                            <?= esc($row['nama']) ?>
+                        </td>
+
+                        <td class="text-center fw-bold">
+                            <?= number_format($row['preferensi'], 4) ?>
+                        </td>
+
+                        <td class="text-center">
+
+                            <?php if ($row['ranking'] == 1): ?>
+
+                            <span class="badge bg-success">
+                                Salesman Terbaik
+                            </span>
+
+                            <?php else: ?>
+
+                            -
+
+                            <?php endif; ?>
+
+                        </td>
+
                     </tr>
                     <?php endforeach; ?>
                     <?php else: ?>
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
+                        <td colspan="5" class="text-center py-4 text-muted">
                             Belum ada hasil perhitungan untuk periode ini.
                         </td>
                     </tr>
@@ -103,6 +256,34 @@
                 </tbody>
             </table>
         </div>
+
+        <?php if (!empty($winner)): ?>
+
+        <hr class="my-4">
+
+        <h5 class="fw-bold">
+            Kesimpulan
+        </h5>
+
+        <p class="mb-4" style="text-align:justify">
+
+            Berdasarkan hasil perhitungan menggunakan metode
+            <strong>Technique for Order Preference by Similarity to Ideal Solution (TOPSIS)</strong>,
+            diperoleh bahwa
+            <strong><?= esc($winner['nama']) ?></strong>
+            menempati
+            <strong>peringkat pertama</strong>
+            dengan nilai preferensi sebesar
+            <strong><?= number_format($winner['preferensi'],4) ?></strong>.
+
+            Dengan demikian,
+            salesman tersebut direkomendasikan sebagai
+            <strong>Salesman Terbaik periode <?= esc($periodeLabel) ?></strong>
+            berdasarkan hasil proses perankingan yang dilakukan oleh sistem.
+
+        </p>
+
+        <?php endif; ?>
 
         <!-- SIGNATURE -->
         <div class="d-flex justify-content-end mt-5">

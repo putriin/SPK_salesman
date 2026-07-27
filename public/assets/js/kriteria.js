@@ -53,10 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return row.bobot ?? row.weight ?? "";
   }
 
-  function getBobotNormalisasi(row) {
-    return row.bobot_normalisasi ?? row.normalized_weight ?? "0";
-  }
-
   function openModal(mode = "add", row = null) {
     if (!modalInstance) return;
 
@@ -106,8 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .includes(q) ||
           String(getNama(item)).toLowerCase().includes(q) ||
           String(getJenis(item)).toLowerCase().includes(q) ||
-          String(getBobot(item)).toLowerCase().includes(q) ||
-          String(getBobotNormalisasi(item)).toLowerCase().includes(q)
+          String(getBobot(item)).toLowerCase().includes(q)
         );
       });
     }
@@ -133,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pageRows.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="6" class="text-center py-4 text-muted">
+          <td colspan="5" class="text-center py-4 text-muted">
             Data tidak ditemukan
           </td>
         </tr>
@@ -144,7 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const nama = getNama(row);
           const jenis = getJenis(row);
           const bobot = getBobot(row);
-          const bobotNormalisasi = getBobotNormalisasi(row);
 
           return `
             <tr>

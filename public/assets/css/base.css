@@ -75,3 +75,41 @@ button.btn-primary:focus {
   border-color: #0b5ed7;
   color: #fff;
 }
+
+.manager-kpi-card {
+  background: #eef9f4;
+
+  border: 1px solid #b7e3c8;
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  text-align: center;
+}
+
+.manager-performance-list {
+  margin-top: 18px;
+}
+
+.performance-item {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid #ececec;
+}
+
+.performance-item:last-child {
+  border-bottom: none;
+}
+
+.performance-item strong {
+  font-size: 18px;
+
+  color: #198754;
+}
