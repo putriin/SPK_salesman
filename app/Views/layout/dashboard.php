@@ -99,7 +99,7 @@
 
                     <a class="nav-link <?= url_is('perhitungan*') ? 'active' : '' ?>"
                         href="<?= base_url('perhitungan') ?>">
-                        Perhitungan TOPSIS
+                        Perankingan
                     </a>
 
                     <a class="nav-link <?= url_is('cetak*') ? 'active' : '' ?>" href="<?= base_url('cetak') ?>">
