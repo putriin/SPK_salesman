@@ -340,8 +340,21 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 1 — Matriks Keputusan</h5>
-                <p class="mb-0 text-muted small">Ini adalah nilai awal dari setiap salesman untuk setiap kriteria.</p>
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 1 — Matriks Keputusan
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Matriks keputusan merupakan data awal yang digunakan dalam proses
+                    perhitungan metode TOPSIS.
+                </p>
+
+                <p class="mb-0 text-muted small">
+                    Tabel berikut menampilkan nilai hasil penilaian masing-masing salesman
+                    pada setiap kriteria sebelum dilakukan proses normalisasi.
+                </p>
+
             </div>
 
             <div class="table-responsive">
@@ -381,8 +394,22 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 2 — Bobot Kriteria</h5>
-                <p class="mb-0 text-muted small">Bobot awal dinormalisasi supaya total bobot menjadi 1.</p>
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 2 — Bobot Kriteria
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Setiap kriteria memiliki tingkat kepentingan (bobot) yang berbeda sesuai
+                    kebutuhan penilaian salesman.
+                </p>
+
+                <p class="mb-0 text-muted small">
+                    Pada tahap ini bobot awal dinormalisasi sehingga total seluruh bobot
+                    bernilai 1. Bobot normalisasi selanjutnya digunakan pada proses
+                    pembentukan matriks ternormalisasi berbobot.
+                </p>
+
             </div>
 
             <div class="table-responsive">
@@ -422,9 +449,22 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 3 — Matriks Ternormalisasi</h5>
-                <p class="mb-0 text-muted small">Setiap nilai dibagi dengan akar jumlah kuadrat pada kolom yang sama.
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 3 — Matriks Ternormalisasi
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Pada tahap ini dilakukan proses normalisasi terhadap matriks keputusan
+                    untuk menyamakan skala nilai setiap kriteria.
                 </p>
+
+                <p class="mb-0 text-muted small">
+                    Nilai setiap salesman dibagi dengan akar jumlah kuadrat pada masing-masing
+                    kriteria sehingga seluruh nilai dapat dibandingkan secara objektif
+                    pada proses TOPSIS.
+                </p>
+
             </div>
 
             <div class="table-responsive">
@@ -464,8 +504,22 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 4 — Matriks Ternormalisasi Berbobot</h5>
-                <p class="mb-0 text-muted small">Nilai normalisasi dikalikan bobot normalisasi tiap kriteria.</p>
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 4 — Matriks Ternormalisasi Berbobot
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Pada tahap ini setiap nilai hasil normalisasi dikalikan dengan bobot
+                    masing-masing kriteria sesuai tingkat kepentingannya.
+                </p>
+
+                <p class="mb-0 text-muted small">
+                    Hasil perkalian tersebut menghasilkan matriks ternormalisasi berbobot
+                    yang digunakan sebagai dasar dalam menentukan solusi ideal positif
+                    dan solusi ideal negatif.
+                </p>
+
             </div>
 
             <div class="table-responsive">
@@ -505,7 +559,22 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 5 — Solusi Ideal Positif dan Negatif</h5>
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 5 — Solusi Ideal Positif dan Negatif
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Pada tahap ini ditentukan nilai terbaik (Solusi Ideal Positif/A⁺)
+                    dan nilai terburuk (Solusi Ideal Negatif/A⁻) untuk setiap kriteria.
+                </p>
+
+                <p class="mb-0 text-muted small">
+                    Nilai tersebut diperoleh dari matriks ternormalisasi berbobot dan
+                    digunakan sebagai acuan dalam menghitung jarak setiap salesman terhadap
+                    kondisi terbaik maupun kondisi terburuk.
+                </p>
+
             </div>
 
             <div class="table-responsive">
@@ -541,8 +610,23 @@ $winnerDemo       = $winnerScores[2] ?? 0;
 
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-light">
-                <h5 class="mb-1 fw-semibold">Step 6 — Nilai Preferensi dan Ranking</h5>
-                <p class="mb-0 text-muted small">Semakin besar nilai preferensi, semakin tinggi ranking-nya.</p>
+
+                <h5 class="mb-1 fw-semibold">
+                    Step 6 — Nilai Preferensi dan Ranking
+                </h5>
+
+                <p class="mb-1 text-muted small">
+                    Pada tahap ini dihitung nilai preferensi setiap salesman berdasarkan
+                    jaraknya terhadap solusi ideal positif dan solusi ideal negatif menggunakan
+                    metode TOPSIS.
+                </p>
+
+                <p class="mb-0 text-muted small">
+                    Nilai preferensi kemudian diurutkan dari yang tertinggi hingga terendah
+                    untuk menghasilkan peringkat akhir dan menentukan salesman terbaik pada
+                    periode penilaian.
+                </p>
+
             </div>
 
             <div class="table-responsive">
